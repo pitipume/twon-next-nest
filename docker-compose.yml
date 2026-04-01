@@ -1,29 +1,29 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: aura_postgres
+    container_name: twon_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: aura
-      POSTGRES_PASSWORD: aura_dev
-      POSTGRES_DB: aura_db
+      POSTGRES_USER: twon
+      POSTGRES_PASSWORD: twon_dev
+      POSTGRES_DB: twon_db
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U aura -d aura_db"]
+      test: ["CMD-SHELL", "pg_isready -U twon -d twon_db"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   mongodb:
     image: mongo:7-jammy
-    container_name: aura_mongodb
+    container_name: twon_mongodb
     restart: unless-stopped
     environment:
-      MONGO_INITDB_ROOT_USERNAME: aura
-      MONGO_INITDB_ROOT_PASSWORD: aura_dev
+      MONGO_INITDB_ROOT_USERNAME: twon
+      MONGO_INITDB_ROOT_PASSWORD: twon_dev
     ports:
       - "27017:27017"
     volumes:
@@ -36,7 +36,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: aura_redis
+    container_name: twon_redis
     restart: unless-stopped
     ports:
       - "6379:6379"

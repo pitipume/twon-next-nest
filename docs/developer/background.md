@@ -10,7 +10,7 @@ their technical background, and how to communicate and collaborate effectively.
 - **Background:** Aviation Engineer → Software Engineer (career switch ~2 years ago)
 - **Generation:** Gen Z
 - **Current role:** Software Engineer at a company (working on enterprise LINE insurance platform)
-- **Personal project:** This platform (Aura) — built for family business
+- **Personal project:** This platform (Twon) — built for family business
 - **Development machines:**
   - Work laptop: Windows (company machine)
   - Personal laptop: Mac (primary machine for this project)
@@ -114,7 +114,7 @@ their technical background, and how to communicate and collaborate effectively.
 
 ## Next Project: Trading Bot Platform
 
-After Aura, building a trading bot platform:
+After Twon, building a trading bot platform:
 - **Exchange:** Binance API first
 - **Language:** NestJS (Node.js) — learned from this project
 - **Reuse:** Auth module, payment abstraction, notification, GitHub Actions, Docker setup

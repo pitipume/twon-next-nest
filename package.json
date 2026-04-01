@@ -1,5 +1,5 @@
 {
-  "name": "aura-platform",
+  "name": "twon-platform",
   "private": true,
   "workspaces": [
     "apps/*",

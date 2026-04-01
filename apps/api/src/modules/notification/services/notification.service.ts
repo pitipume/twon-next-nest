@@ -10,7 +10,7 @@ export class NotificationService {
 
   constructor(private readonly config: ConfigService) {
     this.resend = new Resend(this.config.get('RESEND_API_KEY'));
-    this.fromEmail = this.config.get('EMAIL_FROM', 'noreply@aura-platform.com');
+    this.fromEmail = this.config.get('EMAIL_FROM', 'noreply@twon-platform.com');
   }
 
   async sendOtpEmail(email: string, displayName: string, otp: string): Promise<void> {
@@ -26,7 +26,7 @@ export class NotificationService {
       await this.resend.emails.send({
         from: this.fromEmail,
         to: email,
-        subject: 'Your Aura verification code',
+        subject: 'Your Twon verification code',
         html: this.buildOtpEmailHtml(displayName, otp),
       });
     } catch (error) {
@@ -39,7 +39,7 @@ export class NotificationService {
     return `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
         <h2 style="color: #1a1a1a;">Hi ${displayName},</h2>
-        <p style="color: #555;">Your verification code for Aura is:</p>
+        <p style="color: #555;">Your verification code for Twon is:</p>
         <div style="font-size: 36px; font-weight: bold; letter-spacing: 8px;
                     color: #1a1a1a; padding: 24px; background: #f5f5f5;
                     border-radius: 8px; text-align: center; margin: 24px 0;">

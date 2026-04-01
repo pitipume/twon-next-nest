@@ -112,6 +112,14 @@ npm run format
 ```bash
 cd apps/web
 
+# Install all new dependencies (first time after frontend was scaffolded)
+npm install
+
+# ⚠️  ONE-TIME FIX: Delete the conflicting duplicate route file
+# (both app/page.tsx and app/(main)/page.tsx map to "/" — only one allowed)
+# Run once after npm install, then never again:
+rm src/app/\(main\)/page.tsx
+
 # Start dev server at http://localhost:3000
 npm run dev
 
@@ -123,16 +131,25 @@ npm run start
 
 # Lint
 npm run lint
-
-# Shadcn/ui — add a new component
-npx shadcn@latest add button
-npx shadcn@latest add card
-npx shadcn@latest add dialog
-npx shadcn@latest add form
-npx shadcn@latest add input
-npx shadcn@latest add toast
-# Full list: https://ui.shadcn.com/docs/components
 ```
+
+### Frontend pages (all routes)
+
+| URL | Page |
+|---|---|
+| `/` | Home — catalog browse |
+| `/auth/login` | Login |
+| `/auth/register` | Register (sends OTP) |
+| `/auth/verify?email=...` | OTP verification |
+| `/catalog/:id` | Product detail + buy |
+| `/checkout/:orderId` | Payment QR + slip upload |
+| `/library` | My purchased items |
+| `/library/ebook/:id` | PDF ebook reader |
+| `/library/tarot/:id` | Tarot shuffle + spread |
+| `/admin` | Admin dashboard |
+| `/admin/upload` | Upload ebook or tarot deck |
+| `/admin/orders` | Approve/reject pending payments |
+| `/admin/config` | Set bank details + upload QR |
 
 ---
 
@@ -166,19 +183,22 @@ npm install
 cp apps/api/.env.example apps/api/.env
 # Then open apps/api/.env and fill in secrets
 
-# 3. Start databases
+# 3. Set up frontend env — already created at apps/web/.env.local
+# Edit if API URL is different from http://localhost:3001/api
+
+# 4. ⚠️  One-time frontend fix: remove duplicate route file
+cd apps/web && rm src/app/\(main\)/page.tsx && cd ../..
+
+# 5. Start databases
 docker compose up -d
 
-# 4. Wait ~10 seconds for Postgres to be ready, then migrate
+# 6. Wait ~10 seconds for Postgres to be ready, then migrate
 cd apps/api
 npx prisma generate
 npx prisma migrate dev --name init
 cd ../..
 
-# 5. Set up frontend env
-cp apps/web/.env.example apps/web/.env.local
-
-# 6. Start everything
+# 7. Start everything
 npm run dev
 ```
 
@@ -191,8 +211,8 @@ npm run dev
 | Frontend (Next.js) | http://localhost:3000 | |
 | Backend (NestJS) | http://localhost:3001/api | All routes prefixed with /api |
 | Prisma Studio | http://localhost:5555 | Run `npx prisma studio` in apps/api |
-| PostgreSQL | localhost:5432 | User: aura / Pass: aura_dev / DB: aura_db |
-| MongoDB | localhost:27017 | User: aura / Pass: aura_dev |
+| PostgreSQL | localhost:5432 | User: twon / Pass: twon_dev / DB: twon_db |
+| MongoDB | localhost:27017 | User: twon / Pass: twon_dev |
 | Redis | localhost:6379 | No auth locally |
 
 ---

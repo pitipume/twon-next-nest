@@ -1,4 +1,4 @@
-# CLAUDE.md — Project Aura (working title)
+# CLAUDE.md — Project Twon
 
 > This file is the source of truth for AI-assisted development in this project.
 > Read this before making any code changes. Update it when decisions change.
@@ -7,7 +7,7 @@
 
 ## Project Overview
 
-**Aura Platform** is a dual-commerce platform combining:
+**Twon Platform** is a dual-commerce platform combining:
 1. **Ebook Shop** — buy, read (not download) digital books via browser
 2. **E-Tarot Card Shop** — buy tarot card decks, shuffle and spread cards in-browser
 

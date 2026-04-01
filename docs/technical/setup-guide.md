@@ -130,8 +130,8 @@ cp apps/api/.env.example apps/api/.env
 Then open `apps/api/.env` and fill in:
 ```env
 # These work as-is for local Docker setup — no changes needed:
-DATABASE_URL=postgresql://aura:aura_dev@localhost:5432/aura_db
-MONGODB_URI=mongodb://aura:aura_dev@localhost:27017/aura?authSource=admin
+DATABASE_URL=postgresql://twon:twon_dev@localhost:5432/twon_db
+MONGODB_URI=mongodb://twon:twon_dev@localhost:27017/twon?authSource=admin
 REDIS_URL=redis://localhost:6379
 
 # Change these to random strings:
@@ -166,7 +166,7 @@ docker compose up -d
 
 # Verify all 3 containers are running:
 docker compose ps
-# Should show: aura_postgres, aura_mongodb, aura_redis — all "healthy"
+# Should show: twon_postgres, twon_mongodb, twon_redis — all "healthy"
 ```
 
 ### Step 5 — Run database migrations

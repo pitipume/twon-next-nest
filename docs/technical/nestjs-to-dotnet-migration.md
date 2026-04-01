@@ -271,8 +271,8 @@ builder.Services.AddAuthModule();
    ```bash
    # Create new .NET solution
    cd apps
-   dotnet new sln -n Aura.API
-   dotnet new webapi -n Aura.API -o api-dotnet
+   dotnet new sln -n Twon.API
+   dotnet new webapi -n Twon.API -o api-dotnet
    # Then scaffold modules to match same structure
    ```
 5. **Prisma schema → EF Core:** The `schema.prisma` tables map 1:1 to EF Core entities

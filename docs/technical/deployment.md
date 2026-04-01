@@ -34,8 +34,8 @@ npm run dev
 ### Local Services (docker-compose)
 | Service | Port | Credentials |
 |---|---|---|
-| PostgreSQL | 5432 | `aura` / `aura_dev` / db `aura_db` |
-| MongoDB | 27017 | `aura` / `aura_dev` |
+| PostgreSQL | 5432 | `twon` / `twon_dev` / db `twon_db` |
+| MongoDB | 27017 | `twon` / `twon_dev` |
 | Redis | 6379 | no auth (local only) |
 
 ---
@@ -96,10 +96,10 @@ JWT_REFRESH_SECRET=your-refresh-secret-here
 JWT_REFRESH_EXPIRES_IN=7d
 
 # PostgreSQL
-DATABASE_URL=postgresql://aura:aura_dev@localhost:5432/aura_db
+DATABASE_URL=postgresql://twon:twon_dev@localhost:5432/twon_db
 
 # MongoDB
-MONGODB_URI=mongodb://aura:aura_dev@localhost:27017/aura?authSource=admin
+MONGODB_URI=mongodb://twon:twon_dev@localhost:27017/twon?authSource=admin
 
 # Redis (local)
 REDIS_URL=redis://localhost:6379
@@ -111,7 +111,7 @@ REDIS_URL=redis://localhost:6379
 R2_ACCOUNT_ID=
 R2_ACCESS_KEY_ID=
 R2_SECRET_ACCESS_KEY=
-R2_BUCKET_NAME=aura-storage
+R2_BUCKET_NAME=twon-storage
 R2_PUBLIC_URL=https://pub-xxx.r2.dev   # or custom domain
 
 # Email

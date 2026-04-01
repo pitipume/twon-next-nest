@@ -30,7 +30,7 @@ export class StorageService {
       },
     });
 
-    this.bucket = config.get('R2_BUCKET_NAME', 'aura-storage');
+    this.bucket = config.get('R2_BUCKET_NAME', 'twon-storage');
   }
 
   /**
