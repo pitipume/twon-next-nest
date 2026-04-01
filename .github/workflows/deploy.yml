@@ -1,0 +1,29 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  # Frontend: Vercel deploys automatically via GitHub integration
+  # No action needed here — Vercel watches the repo directly.
+
+  deploy-api:
+    name: Deploy API to Railway
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Railway
+        # Railway also auto-deploys via GitHub integration.
+        # This step is a placeholder for when you need manual control
+        # or environment-specific deployments.
+        run: echo "Railway auto-deploys from main branch. Configure at railway.app."
+
+  notify:
+    name: Notify on failure
+    runs-on: ubuntu-latest
+    needs: [deploy-api]
+    if: failure()
+    steps:
+      - name: Log failure
+        run: echo "Deployment failed — check logs above."

@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  GUEST
+  CUSTOMER
+  PREMIUM
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum OrderStatus {
+  PENDING            // created, waiting for customer to upload slip
+  WAITING_APPROVAL   // slip uploaded, waiting for admin to approve
+  COMPLETED          // admin approved, library access granted
+  REJECTED           // admin rejected (wrong amount, fake slip, etc.)
+  REFUNDED
+}
+
+enum ProductType {
+  EBOOK
+  TAROT_DECK
+}
+
+enum PaymentStatus {
+  PENDING           // waiting for slip upload
+  WAITING_APPROVAL  // slip uploaded, admin hasn't checked yet
+  APPROVED          // admin approved
+  REJECTED          // admin rejected
+}
+
+// ─── Users & Auth ────────────────────────────────────────────────────────────
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  displayName     String
+  passwordHash    String
+  role            UserRole  @default(CUSTOMER)
+  isEmailVerified Boolean   @default(false)
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  refreshTokens   RefreshToken[]
+  orders          Order[]
+  libraryItems    LibraryItem[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id         String    @id @default(uuid())
+  userId     String
+  tokenHash  String
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// ─── Products ────────────────────────────────────────────────────────────────
+
+model Product {
+  id           String      @id @default(uuid())
+  mongoRefId   String      @unique
+  productType  ProductType
+  title        String
+  priceTHB     Decimal     @db.Decimal(10, 2)
+  isPublished  Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  orderItems   OrderItem[]
+  libraryItems LibraryItem[]
+
+  @@index([productType])
+  @@map("products")
+}
+
+// ─── Orders ──────────────────────────────────────────────────────────────────
+
+model Order {
+  id            String      @id @default(uuid())
+  userId        String
+  status        OrderStatus @default(PENDING)
+  totalTHB      Decimal     @db.Decimal(10, 2)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  user          User        @relation(fields: [userId], references: [id])
+  orderItems    OrderItem[]
+  payment       Payment?
+
+  @@index([userId])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String
+  productId String
+  priceTHB  Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+
+  order     Order    @relation(fields: [orderId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+// ─── Payments (Manual PromptPay / bank transfer) ──────────────────────────────
+
+model Payment {
+  id              String        @id @default(uuid())
+  orderId         String        @unique
+  amountTHB       Decimal       @db.Decimal(10, 2)
+  status          PaymentStatus @default(PENDING)
+
+  // Slip submitted by customer
+  slipImageKey    String?       // R2 storage key of uploaded slip image
+  transferredAt   DateTime?     // time customer reported the transfer
+  note            String?       // optional note from customer
+
+  // Admin action
+  approvedBy      String?       // admin userId who approved/rejected
+  approvedAt      DateTime?
+  rejectionReason String?       // filled when admin rejects
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  order           Order         @relation(fields: [orderId], references: [id])
+
+  @@map("payments")
+}
+
+// ─── Payment Config (admin-managed bank details shown at checkout) ─────────────
+
+model PaymentConfig {
+  id            String   @id @default("singleton") // only one record ever
+  bankName      String   @default("")
+  accountName   String   @default("")
+  accountNumber String   @default("")
+  qrImageKey    String   @default("") // R2 key for PromptPay QR image
+  updatedAt     DateTime @updatedAt
+
+  @@map("payment_config")
+}
+
+// ─── Library ─────────────────────────────────────────────────────────────────
+
+model LibraryItem {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  orderId   String
+  grantedAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@map("library_items")
+}
