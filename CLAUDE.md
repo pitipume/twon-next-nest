@@ -219,6 +219,7 @@ NestJS knowledge transfers 100% to the trading bot project.
 - **Always use `Edit` tool** for modifying existing files — it shows a diff preview in VSCode
 - `Write` tool is only acceptable for **brand new files** that do not yet exist
 - After any file is first created with `Write`, all future changes must use `Edit`
+- **Keep docs in sync with code** — whenever you add/change/remove an endpoint, entity field, enum value, or config key, update the relevant doc in `docs/` in the same response. Docs are the source of truth for future AI sessions.
 
 ---
 

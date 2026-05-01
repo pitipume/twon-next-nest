@@ -18,10 +18,10 @@ Target: Thailand + international. Must be scalable from day one.
 
 ## Current implementations
 
-| Stack | Repo folder | Status |
+| Stack | Repo | Status |
 |---|---|---|
-| **Next.js 16 + NestJS** (TypeScript full-stack) | `project-ebook` (this repo) | ✅ In progress |
-| **Angular + C# .NET** (enterprise full-stack) | Not started | 🔲 Planned |
+| **Next.js + NestJS** (TypeScript full-stack) | `project-ebook` (this repo) | ✅ In progress |
+| **Angular + C# .NET** (enterprise full-stack) | `twon-angular-dotnet` | ✅ Built — reference implementation |
 
 ---
 
@@ -33,17 +33,11 @@ When the user opens a new session and this file is present, **ask the following 
 
 > 👋 Welcome back to the **Twon Platform** project.
 >
-> Before we begin — which version would you like to work on today?
+> This repo is the **Next.js + NestJS** implementation.
+> → Read `CLAUDE.md` for tech stack and layer architecture
+> → Read `docs/` for business rules, data models, API contracts
 >
-> **Option 1 — Next.js + NestJS** (current build)
-> TypeScript end-to-end, Turborepo monorepo, already has auth/catalog/library/store/payment modules built.
-> → Read `CLAUDE.md` in this repo for full context.
->
-> **Option 2 — Angular + C# .NET** (greenfield)
-> Enterprise stack, same business domain, C# backend with .NET 8 Web API, Angular 17+ frontend.
-> → Read `docs/architecture/dotnet-angular-plan.md` for the planned architecture.
->
-> Reply with **1** or **2** (or describe what you want to do) and I'll load the right context.
+> The Angular + C# .NET reference implementation lives in the `twon-angular-dotnet` repo.
 
 ---
 
