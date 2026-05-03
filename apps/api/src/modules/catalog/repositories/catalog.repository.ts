@@ -110,6 +110,28 @@ export class CatalogRepository {
     return this.tarotModel.create(data);
   }
 
+  async updateEbookById(id: string, data: Partial<Ebook>): Promise<void> {
+    await this.ebookModel.findByIdAndUpdate(id, data).exec();
+  }
+
+  async updateTarotDeckById(id: string, data: Partial<TarotDeck>): Promise<void> {
+    await this.tarotModel.findByIdAndUpdate(id, data).exec();
+  }
+
+  async setEbookPublishedByProductId(postgresProductId: string, isPublished: boolean): Promise<void> {
+    await this.ebookModel.findOneAndUpdate(
+      { postgresProductId },
+      { isPublished, ...(isPublished && { publishedAt: new Date() }) },
+    ).exec();
+  }
+
+  async setTarotDeckPublishedByProductId(postgresProductId: string, isPublished: boolean): Promise<void> {
+    await this.tarotModel.findOneAndUpdate(
+      { postgresProductId },
+      { isPublished, ...(isPublished && { publishedAt: new Date() }) },
+    ).exec();
+  }
+
   // ─── Prisma product record ────────────────────────────────────────────────
 
   async findProductById(id: string) {

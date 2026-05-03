@@ -68,10 +68,7 @@ export class AdminService {
     }
 
     // 4. Update ebook doc with real fileKey + coverImageUrl
-    await this.catalog['ebookModel'].findByIdAndUpdate(mongoId, {
-      fileKey,
-      coverImageUrl,
-    });
+    await this.catalog.updateEbookById(mongoId, { fileKey, coverImageUrl });
 
     // 5. Create Prisma product record (for pricing + catalog)
     const product = await this.prisma.product.create({
@@ -85,9 +82,7 @@ export class AdminService {
     });
 
     // 6. Update Mongo doc with postgres product id
-    await this.catalog['ebookModel'].findByIdAndUpdate(mongoId, {
-      postgresProductId: product.id,
-    });
+    await this.catalog.updateEbookById(mongoId, { postgresProductId: product.id });
 
     return { productId: product.id, mongoId };
   }
@@ -171,12 +166,7 @@ export class AdminService {
     }
 
     // 5. Update MongoDB deck with all card data
-    await this.catalog['tarotModel'].findByIdAndUpdate(mongoId, {
-      cards,
-      cardCount: cards.length,
-      coverImageUrl,
-      backImageKey,
-    });
+    await this.catalog.updateTarotDeckById(mongoId, { cards, cardCount: cards.length, coverImageUrl, backImageKey });
 
     // 6. Create Prisma product record
     const product = await this.prisma.product.create({
@@ -189,9 +179,7 @@ export class AdminService {
       },
     });
 
-    await this.catalog['tarotModel'].findByIdAndUpdate(mongoId, {
-      postgresProductId: product.id,
-    });
+    await this.catalog.updateTarotDeckById(mongoId, { postgresProductId: product.id });
 
     return { productId: product.id, mongoId, cardCount: cards.length };
   }
@@ -238,15 +226,9 @@ export class AdminService {
 
     // Mirror to MongoDB
     if (product.productType === ProductType.EBOOK) {
-      await this.catalog['ebookModel'].findOneAndUpdate(
-        { postgresProductId: productId },
-        { isPublished, ...(isPublished && { publishedAt: new Date() }) },
-      );
+      await this.catalog.setEbookPublishedByProductId(productId, isPublished);
     } else {
-      await this.catalog['tarotModel'].findOneAndUpdate(
-        { postgresProductId: productId },
-        { isPublished, ...(isPublished && { publishedAt: new Date() }) },
-      );
+      await this.catalog.setTarotDeckPublishedByProductId(productId, isPublished);
     }
 
     return product;
