@@ -62,7 +62,7 @@ export class PaymentController {
   // POST /api/payment/orders/:orderId/approve  [ADMIN]
   @Post('orders/:orderId/approve')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.MERCHANT, UserRole.ADMIN)
   async approvePayment(
     @CurrentUser() user: { id: string },
     @Param('orderId') orderId: string,
@@ -75,7 +75,7 @@ export class PaymentController {
   // POST /api/payment/orders/:orderId/reject  [ADMIN]
   @Post('orders/:orderId/reject')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.MERCHANT, UserRole.ADMIN)
   async rejectPayment(
     @CurrentUser() user: { id: string },
     @Param('orderId') orderId: string,
@@ -89,7 +89,7 @@ export class PaymentController {
   // GET /api/payment/orders/pending  [ADMIN]
   @Get('orders/pending')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.MERCHANT, UserRole.ADMIN)
   async getPendingOrders() {
     const orders = await this.manager.getPendingOrders();
     return ApiResponse.success(orders);

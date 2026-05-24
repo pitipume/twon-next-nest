@@ -10,11 +10,10 @@ datasource db {
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
 enum UserRole {
-  GUEST
   CUSTOMER
   PREMIUM
+  MERCHANT
   ADMIN
-  SUPER_ADMIN
 }
 
 enum OrderStatus {

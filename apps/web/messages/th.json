@@ -79,8 +79,8 @@
     "roles": {
       "CUSTOMER": "ลูกค้า",
       "PREMIUM": "พรีเมียม",
-      "ADMIN": "แอดมิน",
-      "SUPER_ADMIN": "ซุปเปอร์แอดมิน"
+      "MERCHANT": "พ่อค้า",
+      "ADMIN": "แอดมิน"
     }
   },
   "library": {

@@ -11,7 +11,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (user === null) router.push('/auth/login');
-    else if (user && user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+    else if (user && user.role !== 'MERCHANT' && user.role !== 'ADMIN') {
       router.push('/');
     }
   }, [user, router]);

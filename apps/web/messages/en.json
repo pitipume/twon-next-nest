@@ -79,8 +79,8 @@
     "roles": {
       "CUSTOMER": "Customer",
       "PREMIUM": "Premium",
-      "ADMIN": "Admin",
-      "SUPER_ADMIN": "Super Admin"
+      "MERCHANT": "Merchant",
+      "ADMIN": "Admin"
     }
   },
   "library": {

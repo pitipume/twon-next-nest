@@ -33,7 +33,7 @@ export function Navbar() {
     { href: '/', label: t('catalog') },
     ...(user ? [{ href: '/library', label: t('library') }] : []),
     ...(user ? [{ href: '/profile', label: t('profile') }] : []),
-    ...(user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN'
+    ...(user?.role === 'MERCHANT' || user?.role === 'ADMIN'
       ? [{ href: '/admin', label: t('admin') }]
       : []),
   ];

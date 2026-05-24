@@ -24,7 +24,7 @@ import { UploadTarotDeckDto } from './dto/upload-tarot-deck.dto';
 import { SetPaymentConfigDto } from './dto/set-payment-config.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+@Roles(UserRole.MERCHANT, UserRole.ADMIN)
 @Controller('admin')
 export class AdminController {
   constructor(private readonly service: AdminService) {}
