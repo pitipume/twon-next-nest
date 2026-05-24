@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PageSpinner } from '@/components/ui/spinner';
 
 const schema = z.object({
   bankName: z.string().min(1),
@@ -19,10 +20,20 @@ type FormData = z.infer<typeof schema>;
 export default function PaymentConfigPage() {
   const [qrFile, setQrFile] = useState<File | null>(null);
   const [uploadingQr, setUploadingQr] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
+
+  useEffect(() => {
+    api.get('/admin/payment-config')
+      .then(({ data }) => {
+        if (data?.data) reset(data.data);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [reset]);
 
   async function onSubmit(data: FormData) {
     try {
@@ -50,6 +61,8 @@ export default function PaymentConfigPage() {
       setUploadingQr(false);
     }
   }
+
+  if (loading) return <PageSpinner />;
 
   return (
     <div className="mx-auto max-w-lg px-4 py-10 space-y-8">

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   Param,
   Patch,
   Post,
@@ -110,6 +111,18 @@ export class AdminController {
   @Patch('products/:id/unpublish')
   unpublish(@Param('id') id: string) {
     return this.service.setPublished(id, false);
+  }
+
+  // GET /api/admin/products — list all products including unpublished
+  @Get('products')
+  getAllProducts() {
+    return this.service.getAllProducts();
+  }
+
+  // GET /api/admin/payment-config — load current config
+  @Get('payment-config')
+  getPaymentConfig() {
+    return this.service.getPaymentConfig();
   }
 
   // PUT /api/admin/payment-config — set bank name + account details

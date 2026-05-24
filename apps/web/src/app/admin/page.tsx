@@ -20,6 +20,7 @@ export default function AdminPage() {
 
   const links = [
     { href: '/admin/upload', label: 'Upload content', emoji: '📤', desc: 'Add ebooks or tarot decks' },
+    { href: '/admin/products', label: 'Products', emoji: '📦', desc: 'Publish or unpublish content' },
     { href: '/admin/orders', label: 'Pending payments', emoji: '🧾', desc: 'Approve or reject payment slips' },
     { href: '/admin/config', label: 'Payment config', emoji: '🏦', desc: 'Set bank details & QR code' },
   ];

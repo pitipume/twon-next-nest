@@ -186,6 +186,17 @@ export class AdminService {
 
   // ─── Payment config ───────────────────────────────────────────────────────
 
+  async getPaymentConfig() {
+    return this.prisma.paymentConfig.findUnique({ where: { id: 'singleton' } });
+  }
+
+  async getAllProducts() {
+    return this.prisma.product.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, title: true, productType: true, priceTHB: true, isPublished: true, createdAt: true },
+    });
+  }
+
   async setPaymentConfig(params: {
     bankName: string;
     accountName: string;

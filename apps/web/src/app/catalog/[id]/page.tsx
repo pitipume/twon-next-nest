@@ -19,10 +19,22 @@ export default function ProductDetailPage() {
   const { data: product, isLoading } = useQuery({
     queryKey: ['product', id],
     queryFn: async () => {
-      const res = await api.get(`/catalog/products/${id}`);
+      const res = await api.get(`/catalog/${id}`);
       return res.data.data as Product;
     },
   });
+
+  // Check if user already owns this product
+  const { data: library } = useQuery({
+    queryKey: ['library'],
+    queryFn: async () => {
+      const res = await api.get('/library');
+      return res.data.data as { productId: string }[];
+    },
+    enabled: !!user,
+  });
+
+  const alreadyOwned = library?.some((item) => item.productId === id);
 
   const buyMutation = useMutation({
     mutationFn: async () => {
@@ -30,7 +42,6 @@ export default function ProductDetailPage() {
       return res.data.data as { id: string };
     },
     onSuccess: (order) => {
-      toast.success('Order created!');
       router.push(`/checkout/${order.id}`);
     },
     onError: (err: unknown) => {
@@ -44,6 +55,9 @@ export default function ProductDetailPage() {
   if (isLoading) return <PageSpinner />;
   if (!product) return <div className="p-10 text-center text-[var(--muted-foreground)]">Product not found.</div>;
 
+  const isEbook = product.productType === 'EBOOK';
+  const readHref = isEbook ? `/library/ebook/${id}` : `/library/tarot/${id}`;
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
       <div className="flex flex-col gap-8 sm:flex-row">
@@ -53,7 +67,7 @@ export default function ProductDetailPage() {
             <Image src={product.coverImageUrl} alt={product.title} fill className="object-cover" />
           ) : (
             <div className="flex h-full items-center justify-center text-6xl">
-              {product.productType === 'EBOOK' ? '📖' : '🃏'}
+              {isEbook ? '📖' : '🃏'}
             </div>
           )}
         </div>
@@ -62,9 +76,12 @@ export default function ProductDetailPage() {
         <div className="flex flex-1 flex-col gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <Badge variant={product.productType === 'EBOOK' ? 'default' : 'warning'}>
-                {product.productType === 'EBOOK' ? 'Ebook' : 'Tarot Deck'}
+              <Badge variant={isEbook ? 'default' : 'warning'}>
+                {isEbook ? 'Ebook' : 'Tarot Deck'}
               </Badge>
+              {alreadyOwned && (
+                <Badge variant="outline">In your library</Badge>
+              )}
             </div>
             <h1 className="text-2xl font-semibold tracking-tight">{product.title}</h1>
             {product.author && (
@@ -92,7 +109,12 @@ export default function ProductDetailPage() {
             <p className="text-3xl font-bold text-violet-600">
               ฿{Number(product.priceTHB).toLocaleString()}
             </p>
-            {user ? (
+
+            {alreadyOwned ? (
+              <Button size="lg" className="w-full sm:w-auto" onClick={() => router.push(readHref)}>
+                {isEbook ? 'Read now →' : 'Open deck →'}
+              </Button>
+            ) : user ? (
               <Button
                 size="lg"
                 className="w-full sm:w-auto"
