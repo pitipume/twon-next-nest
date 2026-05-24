@@ -15,6 +15,8 @@ import { VerifyRegisterHandler } from './commands/verify-register/verify-registe
 import { LoginHandler } from './commands/login/login.handler';
 import { RefreshTokenHandler } from './commands/refresh-token/refresh-token.handler';
 import { LogoutHandler } from './commands/logout/logout.handler';
+import { ForgotPasswordHandler } from './commands/forgot-password/forgot-password.handler';
+import { ResetPasswordHandler } from './commands/reset-password/reset-password.handler';
 
 const CommandHandlers = [
   InitiateRegisterHandler,
@@ -22,6 +24,8 @@ const CommandHandlers = [
   LoginHandler,
   RefreshTokenHandler,
   LogoutHandler,
+  ForgotPasswordHandler,
+  ResetPasswordHandler,
 ];
 
 @Module({

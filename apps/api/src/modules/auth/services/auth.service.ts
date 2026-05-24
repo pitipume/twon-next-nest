@@ -45,6 +45,11 @@ export class AuthService {
     return bcrypt.compare(plainPassword, hash);
   }
 
+  async updateUserPassword(userId: string, newPassword: string): Promise<void> {
+    const passwordHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+    await this.repository.updateUserPassword(userId, passwordHash);
+  }
+
   // ─── OTP ───────────────────────────────────────────────────────────────────
 
   generateOtp(): string {

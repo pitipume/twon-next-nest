@@ -80,6 +80,44 @@ export class AuthManager {
     };
   }
 
+  // ─── Forgot password: Step 1 — send OTP ──────────────────────────────────
+
+  async forgotPassword(email: string): Promise<ManagerResult> {
+    const user = await this.service.findUserByEmail(email);
+    // Always return success — don't reveal whether email exists (security)
+    if (!user || !user.isActive) return { success: true };
+
+    const otp = this.service.generateOtp();
+    await this.service.storeOtp(email, otp);
+    await this.notification.sendForgotPasswordEmail(email, otp);
+
+    return { success: true };
+  }
+
+  // ─── Forgot password: Step 2 — verify OTP + set new password ─────────────
+
+  async resetPassword(
+    email: string,
+    otp: string,
+    newPassword: string,
+  ): Promise<ManagerResult> {
+    const otpResult = await this.service.verifyOtp(email, otp);
+    if (!otpResult.valid) {
+      return { success: false, message: otpResult.message };
+    }
+
+    const user = await this.service.findUserByEmail(email);
+    if (!user || !user.isActive) {
+      return { success: false, message: 'Account not found.' };
+    }
+
+    await this.service.updateUserPassword(user.id, newPassword);
+    // Revoke all existing sessions so old tokens can't be reused
+    await this.service.revokeAllUserTokens(user.id);
+
+    return { success: true };
+  }
+
   // ─── Login ────────────────────────────────────────────────────────────────
 
   async login(email: string, password: string): Promise<ManagerResult<AuthData>> {

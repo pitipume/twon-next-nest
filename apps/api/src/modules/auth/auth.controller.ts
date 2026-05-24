@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import type { Request, Response } from 'express';
 import { InitiateRegisterDto } from './dto/initiate-register.dto';
@@ -9,6 +9,11 @@ import { VerifyRegisterCommand } from './commands/verify-register/verify-registe
 import { LoginCommand } from './commands/login/login.command';
 import { RefreshTokenCommand } from './commands/refresh-token/refresh-token.command';
 import { LogoutCommand } from './commands/logout/logout.command';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { ForgotPasswordCommand } from './commands/forgot-password/forgot-password.command';
+import { ResetPasswordCommand } from './commands/reset-password/reset-password.command';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 const REFRESH_TOKEN_COOKIE = 'refresh_token';
 const COOKIE_OPTIONS = {
@@ -93,6 +98,24 @@ export class AuthController {
 
     res.clearCookie(REFRESH_TOKEN_COOKIE);
     return result;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  getMe(@Req() req: Request) {
+    return { code: 'A001', data: (req as any).user };
+  }
+
+  @Post('forgot-password')
+  forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.commandBus.execute(new ForgotPasswordCommand(dto.email));
+  }
+
+  @Post('reset-password')
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.commandBus.execute(
+      new ResetPasswordCommand(dto.email, dto.otp, dto.newPassword),
+    );
   }
 
   // ─── Private ────────────────────────────────────────────────────────────

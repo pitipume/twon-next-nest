@@ -1,23 +1,27 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { Menu, X } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { cn } from '@/lib/utils';
 import api from '@/lib/api';
-import { toast } from 'sonner';
 
 export function Navbar() {
   const { user, clear } = useAuthStore();
   const pathname = usePathname();
   const router = useRouter();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   async function handleLogout() {
     try {
       await api.post('/auth/logout');
     } finally {
       clear();
+      setMobileOpen(false);
       router.push('/auth/login');
     }
   }
@@ -25,29 +29,37 @@ export function Navbar() {
   const navLinks = [
     { href: '/', label: 'Catalog' },
     ...(user ? [{ href: '/library', label: 'My Library' }] : []),
+    ...(user ? [{ href: '/profile', label: 'Profile' }] : []),
     ...(user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN'
       ? [{ href: '/admin', label: 'Admin' }]
       : []),
   ];
 
+  const isActive = (href: string) =>
+    href === '/' ? pathname === '/' : pathname.startsWith(href);
+
   return (
-    <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--background)]/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--background)]/90 backdrop-blur-md">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+        <Link
+          href="/"
+          className="flex items-center gap-2 font-semibold tracking-tight"
+          onClick={() => setMobileOpen(false)}
+        >
           <span className="text-xl">✦</span>
           <span>Twon</span>
         </Link>
 
-        {/* Nav links */}
-        <div className="hidden items-center gap-1 sm:flex">
+        {/* Desktop nav links */}
+        <div className="hidden items-center gap-1 md:flex">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={cn(
                 'rounded-md px-3 py-1.5 text-sm transition-colors hover:bg-[var(--muted)]',
-                pathname === link.href
+                isActive(link.href)
                   ? 'font-medium text-[var(--foreground)]'
                   : 'text-[var(--muted-foreground)]',
               )}
@@ -57,17 +69,13 @@ export function Navbar() {
           ))}
         </div>
 
-        {/* Auth */}
-        <div className="flex items-center gap-2">
+        {/* Desktop right side */}
+        <div className="hidden items-center gap-3 md:flex">
+          <ThemeToggle />
           {user ? (
-            <>
-              <span className="hidden text-sm text-[var(--muted-foreground)] sm:inline">
-                {user.displayName}
-              </span>
-              <Button variant="ghost" size="sm" onClick={handleLogout}>
-                Sign out
-              </Button>
-            </>
+            <Button variant="ghost" size="sm" onClick={handleLogout}>
+              Sign out
+            </Button>
           ) : (
             <>
               <Button variant="ghost" size="sm" onClick={() => router.push('/auth/login')}>
@@ -79,7 +87,70 @@ export function Navbar() {
             </>
           )}
         </div>
+
+        {/* Mobile: theme toggle + hamburger */}
+        <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle />
+          <button
+            onClick={() => setMobileOpen((o) => !o)}
+            className="rounded-md p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
       </nav>
+
+      {/* Mobile drawer */}
+      {mobileOpen && (
+        <div className="border-t border-[var(--border)] bg-[var(--background)] px-4 py-4 md:hidden">
+          <div className="flex flex-col gap-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  'rounded-md px-3 py-2.5 text-sm transition-colors hover:bg-[var(--muted)]',
+                  isActive(link.href)
+                    ? 'font-medium text-[var(--foreground)]'
+                    : 'text-[var(--muted-foreground)]',
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            <div className="mt-3 border-t border-[var(--border)] pt-3 flex flex-col gap-2">
+              {user ? (
+                <>
+                  <p className="px-3 text-xs text-[var(--muted-foreground)]">{user.email}</p>
+                  <Button variant="ghost" size="sm" className="justify-start" onClick={handleLogout}>
+                    Sign out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="justify-start"
+                    onClick={() => { router.push('/auth/login'); setMobileOpen(false); }}
+                  >
+                    Sign in
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => { router.push('/auth/register'); setMobileOpen(false); }}
+                  >
+                    Register
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

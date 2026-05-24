@@ -35,6 +35,44 @@ export class NotificationService {
     }
   }
 
+  async sendForgotPasswordEmail(email: string, otp: string): Promise<void> {
+    if (!this.config.get('RESEND_API_KEY')) {
+      this.logger.warn('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      this.logger.warn(`  DEV RESET OTP for ${email}: ${otp}`);
+      this.logger.warn('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      return;
+    }
+
+    try {
+      await this.resend.emails.send({
+        from: this.fromEmail,
+        to: email,
+        subject: 'Reset your Twon password',
+        html: this.buildForgotPasswordEmailHtml(otp),
+      });
+    } catch (error) {
+      this.logger.warn(`Failed to send reset OTP email to ${email}: ${error}`);
+    }
+  }
+
+  private buildForgotPasswordEmailHtml(otp: string): string {
+    return `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
+        <h2 style="color: #1a1a1a;">Reset your password</h2>
+        <p style="color: #555;">Enter this code to reset your Twon password:</p>
+        <div style="font-size: 36px; font-weight: bold; letter-spacing: 8px;
+                    color: #1a1a1a; padding: 24px; background: #f5f5f5;
+                    border-radius: 8px; text-align: center; margin: 24px 0;">
+          ${otp}
+        </div>
+        <p style="color: #555;">This code expires in <strong>5 minutes</strong>.</p>
+        <p style="color: #999; font-size: 12px;">
+          If you didn't request a password reset, please ignore this email.
+        </p>
+      </div>
+    `;
+  }
+
   private buildOtpEmailHtml(displayName: string, otp: string): string {
     return `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
