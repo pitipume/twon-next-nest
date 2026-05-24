@@ -6,6 +6,7 @@ import { z } from 'zod';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +18,7 @@ type FormData = z.infer<typeof schema>;
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
+  const t = useTranslations('auth.forgotPassword');
 
   const {
     register,
@@ -38,30 +40,28 @@ export default function ForgotPasswordPage() {
     <div className="flex min-h-screen flex-col items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="space-y-1 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">Forgot password?</h1>
-          <p className="text-sm text-[var(--muted-foreground)]">
-            Enter your email and we&apos;ll send a reset code
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
+          <p className="text-sm text-[var(--muted-foreground)]">{t('subtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input
             id="email"
-            label="Email"
+            label={t('email')}
             type="email"
             placeholder="you@example.com"
             error={errors.email?.message}
             {...register('email')}
           />
           <Button type="submit" className="w-full" loading={isSubmitting}>
-            Send reset code
+            {t('submit')}
           </Button>
         </form>
 
         <p className="text-center text-sm text-[var(--muted-foreground)]">
-          Remember your password?{' '}
+          {t('rememberPassword')}{' '}
           <Link href="/auth/login" className="font-medium text-violet-600 hover:underline">
-            Sign in
+            {t('signIn')}
           </Link>
         </p>
       </div>

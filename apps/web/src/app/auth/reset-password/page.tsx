@@ -7,6 +7,7 @@ import { z } from 'zod';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +27,7 @@ export default function ResetPasswordPage() {
   const router = useRouter();
   const params = useSearchParams();
   const email = params.get('email') ?? '';
+  const t = useTranslations('auth.resetPassword');
 
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
@@ -33,8 +35,8 @@ export default function ResetPasswordPage() {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
-    const t = setInterval(() => setCountdown((c) => Math.max(0, c - 1)), 1000);
-    return () => clearInterval(t);
+    const timer = setInterval(() => setCountdown((c) => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(timer);
   }, []);
 
   const formatTime = (s: number) =>
@@ -86,14 +88,13 @@ export default function ResetPasswordPage() {
     <div className="flex min-h-screen flex-col items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="space-y-1 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">Reset your password</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
           <p className="text-sm text-[var(--muted-foreground)]">
-            Enter the code sent to <strong>{email}</strong>
+            {t('subtitle')} <strong>{email}</strong>
           </p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* OTP boxes */}
           <div className="flex justify-center gap-2">
             {otp.map((digit, i) => (
               <input
@@ -114,9 +115,10 @@ export default function ResetPasswordPage() {
             {countdown > 0 ? (
               <span>Code expires in {formatTime(countdown)}</span>
             ) : (
-              <span className="text-red-500">Code expired —{' '}
+              <span className="text-red-500">
+                Code expired —{' '}
                 <Link href="/auth/forgot-password" className="font-medium text-violet-600 hover:underline">
-                  request a new one
+                  {t('codeExpiredLink')}
                 </Link>
               </span>
             )}
@@ -125,7 +127,7 @@ export default function ResetPasswordPage() {
           <div className="space-y-4">
             <Input
               id="newPassword"
-              label="New password"
+              label={t('newPassword')}
               type="password"
               placeholder="Min 8 characters"
               error={errors.newPassword?.message}
@@ -133,7 +135,7 @@ export default function ResetPasswordPage() {
             />
             <Input
               id="confirmPassword"
-              label="Confirm new password"
+              label={t('confirmPassword')}
               type="password"
               placeholder="••••••••"
               error={errors.confirmPassword?.message}
@@ -142,13 +144,13 @@ export default function ResetPasswordPage() {
           </div>
 
           <Button type="submit" className="w-full" loading={loading} disabled={countdown === 0}>
-            Reset password
+            {t('submit')}
           </Button>
         </form>
 
         <p className="text-center text-sm text-[var(--muted-foreground)]">
           <Link href="/auth/forgot-password" className="font-medium text-violet-600 hover:underline">
-            ← Try a different email
+            {t('tryDifferent')}
           </Link>
         </p>
       </div>

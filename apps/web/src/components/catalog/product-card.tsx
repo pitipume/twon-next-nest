@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { Product } from '@/types/product';
 import { Badge } from '@/components/ui/badge';
 
@@ -8,6 +11,9 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const t = useTranslations('product');
+  const isEbook = product.productType === 'EBOOK';
+
   return (
     <Link
       href={`/catalog/${product.id}`}
@@ -25,12 +31,12 @@ export function ProductCard({ product }: ProductCardProps) {
           />
         ) : (
           <div className="flex h-full items-center justify-center text-4xl text-[var(--muted-foreground)]">
-            {product.productType === 'EBOOK' ? '📖' : '🃏'}
+            {isEbook ? '📖' : '🃏'}
           </div>
         )}
         <div className="absolute top-2 left-2">
-          <Badge variant={product.productType === 'EBOOK' ? 'default' : 'warning'}>
-            {product.productType === 'EBOOK' ? 'Ebook' : 'Tarot'}
+          <Badge variant={isEbook ? 'default' : 'warning'}>
+            {isEbook ? t('ebook') : t('tarot')}
           </Badge>
         </div>
       </div>
@@ -42,7 +48,9 @@ export function ProductCard({ product }: ProductCardProps) {
           <p className="text-xs text-[var(--muted-foreground)]">{product.author}</p>
         )}
         {product.cardCount && (
-          <p className="text-xs text-[var(--muted-foreground)]">{product.cardCount} cards</p>
+          <p className="text-xs text-[var(--muted-foreground)]">
+            {t('cards', { count: product.cardCount })}
+          </p>
         )}
         <div className="mt-auto pt-2">
           <span className="text-sm font-semibold text-violet-600">

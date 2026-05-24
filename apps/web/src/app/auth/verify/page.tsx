@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
 import { Button } from '@/components/ui/button';
@@ -13,10 +14,11 @@ export default function VerifyPage() {
   const email = params.get('email') ?? '';
   const setAccessToken = useAuthStore((s) => s.setAccessToken);
   const setUser = useAuthStore((s) => s.setUser);
+  const t = useTranslations('auth.verify');
 
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
-  const [countdown, setCountdown] = useState(300); // 5 min
+  const [countdown, setCountdown] = useState(300);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
@@ -53,7 +55,7 @@ export default function VerifyPage() {
       const { accessToken, user } = res.data.data;
       setAccessToken(accessToken);
       if (user) setUser(user);
-      toast.success('Account verified! Welcome to Twon 🎉');
+      toast.success('Account verified! Welcome to Twon');
       router.push('/');
     } catch (err: unknown) {
       const message =
@@ -69,14 +71,13 @@ export default function VerifyPage() {
     <div className="flex min-h-screen flex-col items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="space-y-1 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">Check your email</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
           <p className="text-sm text-[var(--muted-foreground)]">
-            We sent a 6-digit code to <strong>{email}</strong>
+            {t('subtitle')} <strong>{email}</strong>
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* OTP boxes */}
           <div className="flex justify-center gap-2">
             {otp.map((digit, i) => (
               <input
@@ -95,14 +96,14 @@ export default function VerifyPage() {
 
           <div className="text-center text-sm text-[var(--muted-foreground)]">
             {countdown > 0 ? (
-              <span>Code expires in {formatTime(countdown)}</span>
+              <span>{t('codeExpires')} {formatTime(countdown)}</span>
             ) : (
-              <span className="text-red-500">Code expired — please register again</span>
+              <span className="text-red-500">{t('codeExpired')}</span>
             )}
           </div>
 
           <Button type="submit" className="w-full" loading={loading} disabled={countdown === 0}>
-            Verify & continue
+            {t('submit')}
           </Button>
         </form>
       </div>

@@ -6,6 +6,7 @@ import { z } from 'zod';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,12 +26,12 @@ type FormData = z.infer<typeof schema>;
 
 export default function RegisterPage() {
   const router = useRouter();
+  const t = useTranslations('auth.register');
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    getValues,
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   async function onSubmit(data: FormData) {
@@ -39,7 +40,6 @@ export default function RegisterPage() {
         email: data.email,
         displayName: data.displayName,
       });
-      // Store password temporarily so verify page can complete registration
       sessionStorage.setItem('reg_password', data.password);
       toast.success('OTP sent to your email!');
       router.push(`/auth/verify?email=${encodeURIComponent(data.email)}`);
@@ -55,16 +55,14 @@ export default function RegisterPage() {
     <div className="flex min-h-screen flex-col items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="space-y-1 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">Create account</h1>
-          <p className="text-sm text-[var(--muted-foreground)]">
-            Join Twon — ebooks & tarot awaits
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
+          <p className="text-sm text-[var(--muted-foreground)]">{t('subtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input
             id="email"
-            label="Email"
+            label={t('email')}
             type="email"
             placeholder="you@example.com"
             error={errors.email?.message}
@@ -72,14 +70,14 @@ export default function RegisterPage() {
           />
           <Input
             id="displayName"
-            label="Display name"
+            label={t('displayName')}
             placeholder="Your name"
             error={errors.displayName?.message}
             {...register('displayName')}
           />
           <Input
             id="password"
-            label="Password"
+            label={t('password')}
             type="password"
             placeholder="Min 8 characters"
             error={errors.password?.message}
@@ -87,21 +85,21 @@ export default function RegisterPage() {
           />
           <Input
             id="confirmPassword"
-            label="Confirm password"
+            label={t('confirmPassword')}
             type="password"
             placeholder="••••••••"
             error={errors.confirmPassword?.message}
             {...register('confirmPassword')}
           />
           <Button type="submit" className="w-full" loading={isSubmitting}>
-            Send OTP
+            {t('submit')}
           </Button>
         </form>
 
         <p className="text-center text-sm text-[var(--muted-foreground)]">
-          Already have an account?{' '}
+          {t('hasAccount')}{' '}
           <Link href="/auth/login" className="font-medium text-violet-600 hover:underline">
-            Sign in
+            {t('signIn')}
           </Link>
         </p>
       </div>

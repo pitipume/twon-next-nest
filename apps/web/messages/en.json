@@ -1,0 +1,94 @@
+{
+  "nav": {
+    "catalog": "Catalog",
+    "library": "My Library",
+    "profile": "Profile",
+    "admin": "Admin",
+    "signIn": "Sign in",
+    "register": "Register",
+    "signOut": "Sign out"
+  },
+  "home": {
+    "title": "Discover books & tarot",
+    "subtitle": "Read ebooks in your browser. Shuffle tarot decks in your hands.",
+    "filterAll": "All",
+    "filterEbook": "Ebooks",
+    "filterTarot": "Tarot Decks",
+    "empty": "No products yet"
+  },
+  "product": {
+    "ebook": "Ebook",
+    "tarot": "Tarot",
+    "cards": "{count} cards"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Welcome back to Twon",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign in",
+      "noAccount": "Don't have an account?",
+      "register": "Register"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Join Twon — ebooks & tarot awaits",
+      "email": "Email",
+      "displayName": "Display name",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "submit": "Send OTP",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "verify": {
+      "title": "Check your email",
+      "subtitle": "We sent a 6-digit code to",
+      "codeExpires": "Code expires in",
+      "codeExpired": "Code expired — please register again",
+      "submit": "Verify & continue"
+    },
+    "forgotPassword": {
+      "title": "Forgot password?",
+      "subtitle": "Enter your email and we'll send a reset code",
+      "email": "Email",
+      "submit": "Send reset code",
+      "rememberPassword": "Remember your password?",
+      "signIn": "Sign in"
+    },
+    "resetPassword": {
+      "title": "Reset your password",
+      "subtitle": "Enter the code sent to",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "submit": "Reset password",
+      "tryDifferent": "← Try a different email",
+      "codeExpiredLink": "request a new one"
+    }
+  },
+  "profile": {
+    "title": "My Profile",
+    "subtitle": "Your account details",
+    "displayName": "Display name",
+    "email": "Email",
+    "accountType": "Account type",
+    "myLibrary": "My Library",
+    "changePassword": "Change password",
+    "roles": {
+      "CUSTOMER": "Customer",
+      "PREMIUM": "Premium",
+      "ADMIN": "Admin",
+      "SUPER_ADMIN": "Super Admin"
+    }
+  },
+  "library": {
+    "title": "My Library",
+    "subtitle": "Your purchased books and tarot decks",
+    "emptyTitle": "Your library is empty",
+    "browseCatalog": "Browse catalog →",
+    "readNow": "Read now →",
+    "shuffleDeck": "Shuffle deck →"
+  }
+}

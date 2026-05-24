@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { ProductCard } from '@/components/catalog/product-card';
 import { PageSpinner } from '@/components/ui/spinner';
@@ -11,6 +12,7 @@ type Filter = 'all' | 'ebook' | 'tarot_deck';
 
 export default function HomePage() {
   const [filter, setFilter] = useState<Filter>('all');
+  const t = useTranslations('home');
 
   const { data, isLoading } = useQuery({
     queryKey: ['catalog', filter],
@@ -21,31 +23,33 @@ export default function HomePage() {
     },
   });
 
+  const filters: { key: Filter; label: string }[] = [
+    { key: 'all', label: t('filterAll') },
+    { key: 'ebook', label: t('filterEbook') },
+    { key: 'tarot_deck', label: t('filterTarot') },
+  ];
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 space-y-8">
       {/* Hero */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">
-          ✦ Discover books &amp; tarot
-        </h1>
-        <p className="text-[var(--muted-foreground)]">
-          Read ebooks in your browser. Shuffle tarot decks in your hands.
-        </p>
+        <h1 className="text-3xl font-semibold tracking-tight">✦ {t('title')}</h1>
+        <p className="text-[var(--muted-foreground)]">{t('subtitle')}</p>
       </div>
 
       {/* Filter tabs */}
       <div className="flex gap-2 border-b border-[var(--border)]">
-        {(['all', 'ebook', 'tarot_deck'] as Filter[]).map((f) => (
+        {filters.map(({ key, label }) => (
           <button
-            key={f}
-            onClick={() => setFilter(f)}
+            key={key}
+            onClick={() => setFilter(key)}
             className={`pb-2 px-1 text-sm font-medium transition-colors border-b-2 -mb-px ${
-              filter === f
+              filter === key
                 ? 'border-violet-600 text-violet-600'
                 : 'border-transparent text-[var(--muted-foreground)] hover:text-[var(--foreground)]'
             }`}
           >
-            {f === 'all' ? 'All' : f === 'ebook' ? 'Ebooks' : 'Tarot Decks'}
+            {label}
           </button>
         ))}
       </div>
@@ -56,7 +60,7 @@ export default function HomePage() {
       ) : !data?.length ? (
         <div className="flex flex-col items-center justify-center py-20 text-[var(--muted-foreground)]">
           <span className="text-5xl">📭</span>
-          <p className="mt-3 text-sm">No products yet</p>
+          <p className="mt-3 text-sm">{t('empty')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">

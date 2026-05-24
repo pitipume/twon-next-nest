@@ -1,0 +1,94 @@
+{
+  "nav": {
+    "catalog": "หน้าร้าน",
+    "library": "คลังของฉัน",
+    "profile": "โปรไฟล์",
+    "admin": "แอดมิน",
+    "signIn": "เข้าสู่ระบบ",
+    "register": "สมัครสมาชิก",
+    "signOut": "ออกจากระบบ"
+  },
+  "home": {
+    "title": "ค้นพบหนังสือและไพ่ทาโรต์",
+    "subtitle": "อ่าน Ebook ในเบราว์เซอร์ สับไพ่ทาโรต์ได้เลย",
+    "filterAll": "ทั้งหมด",
+    "filterEbook": "Ebook",
+    "filterTarot": "ไพ่ทาโรต์",
+    "empty": "ยังไม่มีสินค้า"
+  },
+  "product": {
+    "ebook": "Ebook",
+    "tarot": "ไพ่ทาโรต์",
+    "cards": "{count} ใบ"
+  },
+  "auth": {
+    "login": {
+      "title": "เข้าสู่ระบบ",
+      "subtitle": "ยินดีต้อนรับกลับสู่ Twon",
+      "email": "อีเมล",
+      "password": "รหัสผ่าน",
+      "forgotPassword": "ลืมรหัสผ่าน?",
+      "submit": "เข้าสู่ระบบ",
+      "noAccount": "ยังไม่มีบัญชี?",
+      "register": "สมัครสมาชิก"
+    },
+    "register": {
+      "title": "สร้างบัญชี",
+      "subtitle": "เข้าร่วม Twon — Ebook และไพ่ทาโรต์รอคุณอยู่",
+      "email": "อีเมล",
+      "displayName": "ชื่อที่แสดง",
+      "password": "รหัสผ่าน",
+      "confirmPassword": "ยืนยันรหัสผ่าน",
+      "submit": "ส่ง OTP",
+      "hasAccount": "มีบัญชีอยู่แล้ว?",
+      "signIn": "เข้าสู่ระบบ"
+    },
+    "verify": {
+      "title": "ตรวจสอบอีเมลของคุณ",
+      "subtitle": "เราส่งรหัส 6 หลักไปที่",
+      "codeExpires": "รหัสหมดอายุใน",
+      "codeExpired": "รหัสหมดอายุแล้ว — กรุณาลงทะเบียนใหม่",
+      "submit": "ยืนยันและดำเนินการต่อ"
+    },
+    "forgotPassword": {
+      "title": "ลืมรหัสผ่าน?",
+      "subtitle": "กรอกอีเมลแล้วเราจะส่งรหัสรีเซ็ตให้",
+      "email": "อีเมล",
+      "submit": "ส่งรหัสรีเซ็ต",
+      "rememberPassword": "จำรหัสผ่านได้แล้ว?",
+      "signIn": "เข้าสู่ระบบ"
+    },
+    "resetPassword": {
+      "title": "รีเซ็ตรหัสผ่าน",
+      "subtitle": "กรอกรหัสที่ส่งไปที่",
+      "newPassword": "รหัสผ่านใหม่",
+      "confirmPassword": "ยืนยันรหัสผ่านใหม่",
+      "submit": "รีเซ็ตรหัสผ่าน",
+      "tryDifferent": "← ลองอีเมลอื่น",
+      "codeExpiredLink": "ขอรหัสใหม่"
+    }
+  },
+  "profile": {
+    "title": "โปรไฟล์ของฉัน",
+    "subtitle": "ข้อมูลบัญชีของคุณ",
+    "displayName": "ชื่อที่แสดง",
+    "email": "อีเมล",
+    "accountType": "ประเภทบัญชี",
+    "myLibrary": "คลังของฉัน",
+    "changePassword": "เปลี่ยนรหัสผ่าน",
+    "roles": {
+      "CUSTOMER": "ลูกค้า",
+      "PREMIUM": "พรีเมียม",
+      "ADMIN": "แอดมิน",
+      "SUPER_ADMIN": "ซุปเปอร์แอดมิน"
+    }
+  },
+  "library": {
+    "title": "คลังของฉัน",
+    "subtitle": "Ebook และไพ่ทาโรต์ที่ซื้อแล้ว",
+    "emptyTitle": "คลังของคุณว่างเปล่า",
+    "browseCatalog": "เรียกดูหน้าร้าน →",
+    "readNow": "อ่านเลย →",
+    "shuffleDeck": "เปิดสำรับไพ่ →"
+  }
+}

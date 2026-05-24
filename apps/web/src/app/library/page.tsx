@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import Image from 'next/image';
 import api from '@/lib/api';
@@ -21,6 +22,8 @@ interface LibraryItem {
 export default function LibraryPage() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
+  const t = useTranslations('library');
+  const tp = useTranslations('product');
 
   useEffect(() => {
     if (user === null) router.push('/auth/login');
@@ -40,16 +43,16 @@ export default function LibraryPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 space-y-8">
       <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">My Library</h1>
-        <p className="text-sm text-[var(--muted-foreground)]">Your purchased books and tarot decks</p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
+        <p className="text-sm text-[var(--muted-foreground)]">{t('subtitle')}</p>
       </div>
 
       {!items?.length ? (
         <div className="flex flex-col items-center justify-center py-20 text-[var(--muted-foreground)]">
           <span className="text-5xl">📚</span>
-          <p className="mt-3 text-sm">Your library is empty</p>
+          <p className="mt-3 text-sm">{t('emptyTitle')}</p>
           <Link href="/" className="mt-4 text-sm text-violet-600 hover:underline">
-            Browse catalog →
+            {t('browseCatalog')}
           </Link>
         </div>
       ) : (
@@ -82,14 +85,14 @@ export default function LibraryPage() {
                   )}
                   <div className="absolute top-2 left-2">
                     <Badge variant={isEbook ? 'default' : 'warning'}>
-                      {isEbook ? 'Ebook' : 'Tarot'}
+                      {isEbook ? tp('ebook') : tp('tarot')}
                     </Badge>
                   </div>
                 </div>
                 <div className="p-3 space-y-1">
                   <h3 className="line-clamp-2 text-sm font-medium leading-snug">{p.title}</h3>
                   <p className="text-xs text-violet-600 font-medium">
-                    {isEbook ? 'Read now →' : 'Shuffle deck →'}
+                    {isEbook ? t('readNow') : t('shuffleDeck')}
                   </p>
                 </div>
               </Link>

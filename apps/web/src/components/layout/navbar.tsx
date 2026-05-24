@@ -4,9 +4,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/auth.store';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { LocaleToggle } from '@/components/ui/locale-toggle';
 import { cn } from '@/lib/utils';
 import api from '@/lib/api';
 
@@ -15,6 +17,7 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const t = useTranslations('nav');
 
   async function handleLogout() {
     try {
@@ -27,11 +30,11 @@ export function Navbar() {
   }
 
   const navLinks = [
-    { href: '/', label: 'Catalog' },
-    ...(user ? [{ href: '/library', label: 'My Library' }] : []),
-    ...(user ? [{ href: '/profile', label: 'Profile' }] : []),
+    { href: '/', label: t('catalog') },
+    ...(user ? [{ href: '/library', label: t('library') }] : []),
+    ...(user ? [{ href: '/profile', label: t('profile') }] : []),
     ...(user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN'
-      ? [{ href: '/admin', label: 'Admin' }]
+      ? [{ href: '/admin', label: t('admin') }]
       : []),
   ];
 
@@ -70,26 +73,28 @@ export function Navbar() {
         </div>
 
         {/* Desktop right side */}
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-2 md:flex">
+          <LocaleToggle />
           <ThemeToggle />
           {user ? (
             <Button variant="ghost" size="sm" onClick={handleLogout}>
-              Sign out
+              {t('signOut')}
             </Button>
           ) : (
             <>
               <Button variant="ghost" size="sm" onClick={() => router.push('/auth/login')}>
-                Sign in
+                {t('signIn')}
               </Button>
               <Button size="sm" onClick={() => router.push('/auth/register')}>
-                Register
+                {t('register')}
               </Button>
             </>
           )}
         </div>
 
-        {/* Mobile: theme toggle + hamburger */}
+        {/* Mobile: toggles + hamburger */}
         <div className="flex items-center gap-2 md:hidden">
+          <LocaleToggle />
           <ThemeToggle />
           <button
             onClick={() => setMobileOpen((o) => !o)}
@@ -126,7 +131,7 @@ export function Navbar() {
                 <>
                   <p className="px-3 text-xs text-[var(--muted-foreground)]">{user.email}</p>
                   <Button variant="ghost" size="sm" className="justify-start" onClick={handleLogout}>
-                    Sign out
+                    {t('signOut')}
                   </Button>
                 </>
               ) : (
@@ -137,13 +142,13 @@ export function Navbar() {
                     className="justify-start"
                     onClick={() => { router.push('/auth/login'); setMobileOpen(false); }}
                   >
-                    Sign in
+                    {t('signIn')}
                   </Button>
                   <Button
                     size="sm"
                     onClick={() => { router.push('/auth/register'); setMobileOpen(false); }}
                   >
-                    Register
+                    {t('register')}
                   </Button>
                 </>
               )}
