@@ -47,7 +47,9 @@ export default function VerifyPage() {
     if (code.length < 6) return toast.error('Enter the full 6-digit code');
     setLoading(true);
     try {
-      const res = await api.post('/auth/register/verify', { email, otp: code });
+      const password = sessionStorage.getItem('reg_password') ?? '';
+      sessionStorage.removeItem('reg_password');
+      const res = await api.post('/auth/register/verify', { email, otp: code, password });
       const { accessToken, user } = res.data.data;
       setAccessToken(accessToken);
       if (user) setUser(user);

@@ -20,6 +20,10 @@ export class CatalogService {
     return { product, ebook };
   }
 
+  async getProductMeta(productId: string) {
+    return this.repository.findProductById(productId);
+  }
+
   async getTarotDeckDetail(productId: string) {
     const product = await this.repository.findProductById(productId);
     if (!product || !product.isPublished) return null;

@@ -16,7 +16,7 @@ export default function HomePage() {
     queryKey: ['catalog', filter],
     queryFn: async () => {
       const params = filter !== 'all' ? `?type=${filter}` : '';
-      const res = await api.get(`/catalog/products${params}`);
+      const res = await api.get(`/catalog${params}`);
       return res.data.data as Product[];
     },
   });

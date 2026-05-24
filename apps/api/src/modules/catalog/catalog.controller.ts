@@ -33,4 +33,10 @@ export class CatalogController {
   getTarotDeck(@Param('id') id: string) {
     return this.queryBus.execute(new GetProductDetailQuery(id, 'tarot_deck'));
   }
+
+  // GET /api/catalog/:id — generic, auto-detects ebook or tarot deck by product ID
+  @Get(':id')
+  getProduct(@Param('id') id: string) {
+    return this.queryBus.execute(new GetProductDetailQuery(id, 'auto'));
+  }
 }

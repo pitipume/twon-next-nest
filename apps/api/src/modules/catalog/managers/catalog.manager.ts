@@ -18,4 +18,12 @@ export class CatalogManager {
   async getTarotDeckDetail(productId: string) {
     return this.service.getTarotDeckDetail(productId);
   }
+
+  async getProductDetail(productId: string) {
+    const meta = await this.service.getProductMeta(productId);
+    if (!meta) return null;
+    return meta.productType === 'EBOOK'
+      ? this.getEbookDetail(productId)
+      : this.getTarotDeckDetail(productId);
+  }
 }

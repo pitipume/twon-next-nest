@@ -38,10 +38,10 @@ export default function RegisterPage() {
       await api.post('/auth/register/initiate', {
         email: data.email,
         displayName: data.displayName,
-        password: data.password,
       });
+      // Store password temporarily so verify page can complete registration
+      sessionStorage.setItem('reg_password', data.password);
       toast.success('OTP sent to your email!');
-      // Pass email to verify page via query param
       router.push(`/auth/verify?email=${encodeURIComponent(data.email)}`);
     } catch (err: unknown) {
       const message =

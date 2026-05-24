@@ -29,7 +29,7 @@ export default function TarotPage() {
   const { data: session, isLoading } = useQuery({
     queryKey: ['tarot-session', id],
     queryFn: async () => {
-      const res = await api.get(`/library/tarot/${id}/session`);
+      const res = await api.get(`/library/tarot-decks/${id}/session`);
       return res.data.data as TarotSession;
     },
   });

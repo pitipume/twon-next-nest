@@ -9,9 +9,11 @@ export class GetProductDetailHandler implements IQueryHandler<GetProductDetailQu
 
   async execute(query: GetProductDetailQuery) {
     const result =
-      query.productType === 'ebook'
-        ? await this.manager.getEbookDetail(query.productId)
-        : await this.manager.getTarotDeckDetail(query.productId);
+      query.productType === 'auto'
+        ? await this.manager.getProductDetail(query.productId)
+        : query.productType === 'ebook'
+          ? await this.manager.getEbookDetail(query.productId)
+          : await this.manager.getTarotDeckDetail(query.productId);
 
     if (!result) {
       return ApiResponse.notFound('Product not found.');

@@ -22,7 +22,7 @@ export default function EbookReaderPage() {
   const { data: session, isLoading } = useQuery({
     queryKey: ['ebook-session', id],
     queryFn: async () => {
-      const res = await api.get(`/library/ebook/${id}/session`);
+      const res = await api.get(`/library/ebooks/${id}/session`);
       return res.data.data as EbookSession;
     },
   });

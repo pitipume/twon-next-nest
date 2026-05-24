@@ -220,6 +220,10 @@ NestJS knowledge transfers 100% to the trading bot project.
 - `Write` tool is only acceptable for **brand new files** that do not yet exist
 - After any file is first created with `Write`, all future changes must use `Edit`
 - **Keep docs in sync with code** — whenever you add/change/remove an endpoint, entity field, enum value, or config key, update the relevant doc in `docs/` in the same response. Docs are the source of truth for future AI sessions.
+- **Keep CLAUDE.md in sync with decisions** — update CLAUDE.md whenever a decision is made, at any stage:
+  - **During exploration/draft** → add the entry marked `[DRAFT]` so future sessions know it's in progress
+  - **Once finalized** → remove the `[DRAFT]` marker and write the clean settled version
+  - Never leave CLAUDE.md silent about something actively being decided — a draft note is better than nothing
 
 ---
 
