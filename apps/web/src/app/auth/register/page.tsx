@@ -10,6 +10,7 @@ import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 
 const schema = z
   .object({
@@ -75,18 +76,16 @@ export default function RegisterPage() {
             error={errors.displayName?.message}
             {...register('displayName')}
           />
-          <Input
+          <PasswordInput
             id="password"
             label={t('password')}
-            type="password"
             placeholder="Min 8 characters"
             error={errors.password?.message}
             {...register('password')}
           />
-          <Input
+          <PasswordInput
             id="confirmPassword"
             label={t('confirmPassword')}
-            type="password"
             placeholder="••••••••"
             error={errors.confirmPassword?.message}
             {...register('confirmPassword')}

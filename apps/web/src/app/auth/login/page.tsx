@@ -11,6 +11,7 @@ import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 
 const schema = z.object({
   email: z.string().email('Invalid email'),
@@ -65,10 +66,9 @@ export default function LoginPage() {
             {...register('email')}
           />
           <div className="space-y-1">
-            <Input
+            <PasswordInput
               id="password"
               label={t('password')}
-              type="password"
               placeholder="••••••••"
               autoComplete="current-password"
               error={errors.password?.message}

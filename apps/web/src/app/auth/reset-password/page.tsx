@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 
 const schema = z
   .object({
@@ -125,18 +125,16 @@ export default function ResetPasswordPage() {
           </div>
 
           <div className="space-y-4">
-            <Input
+            <PasswordInput
               id="newPassword"
               label={t('newPassword')}
-              type="password"
               placeholder="Min 8 characters"
               error={errors.newPassword?.message}
               {...register('newPassword')}
             />
-            <Input
+            <PasswordInput
               id="confirmPassword"
               label={t('confirmPassword')}
-              type="password"
               placeholder="••••••••"
               error={errors.confirmPassword?.message}
               {...register('confirmPassword')}
