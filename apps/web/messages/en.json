@@ -48,7 +48,11 @@
       "subtitle": "We sent a 6-digit code to",
       "codeExpires": "Code expires in",
       "codeExpired": "Code expired — please register again",
-      "submit": "Verify & continue"
+      "submit": "Verify & continue",
+      "noCode": "Didn't receive a code?",
+      "resend": "Resend",
+      "resending": "Sending...",
+      "resendIn": "Resend in {seconds}s"
     },
     "forgotPassword": {
       "title": "Forgot password?",

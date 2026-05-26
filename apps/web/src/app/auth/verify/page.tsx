@@ -18,13 +18,39 @@ export default function VerifyPage() {
 
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
   const [countdown, setCountdown] = useState(300);
+  const [resendCooldown, setResendCooldown] = useState(60);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     const t = setInterval(() => setCountdown((c) => Math.max(0, c - 1)), 1000);
     return () => clearInterval(t);
   }, []);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setInterval(() => setResendCooldown((c) => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(t);
+  }, [resendCooldown]);
+
+  async function handleResend() {
+    const displayName = sessionStorage.getItem('reg_displayName') ?? '';
+    if (!displayName) return toast.error('Session expired. Please register again.');
+    setResending(true);
+    try {
+      await api.post('/auth/register/initiate', { email, displayName });
+      setOtp(['', '', '', '', '', '']);
+      setCountdown(300);
+      setResendCooldown(60);
+      inputRefs.current[0]?.focus();
+      toast.success('New code sent!');
+    } catch {
+      toast.error('Failed to resend code.');
+    } finally {
+      setResending(false);
+    }
+  }
 
   const formatTime = (s: number) =>
     `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
@@ -106,6 +132,21 @@ export default function VerifyPage() {
             {t('submit')}
           </Button>
         </form>
+
+        <p className="text-center text-sm text-[var(--muted-foreground)]">
+          {t('noCode')}{' '}
+          {resendCooldown > 0 ? (
+            <span className="text-[var(--muted-foreground)]">{t('resendIn', { seconds: resendCooldown })}</span>
+          ) : (
+            <button
+              onClick={handleResend}
+              disabled={resending}
+              className="font-medium text-violet-600 hover:underline disabled:opacity-50"
+            >
+              {resending ? t('resending') : t('resend')}
+            </button>
+          )}
+        </p>
       </div>
     </div>
   );

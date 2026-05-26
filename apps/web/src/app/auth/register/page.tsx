@@ -42,6 +42,7 @@ export default function RegisterPage() {
         displayName: data.displayName,
       });
       sessionStorage.setItem('reg_password', data.password);
+      sessionStorage.setItem('reg_displayName', data.displayName);
       toast.success('OTP sent to your email!');
       router.push(`/auth/verify?email=${encodeURIComponent(data.email)}`);
     } catch (err: unknown) {
