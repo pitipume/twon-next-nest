@@ -162,7 +162,13 @@ Admin upload flow:
 - **Security:** No secrets in code, all via env vars / AWS Secrets Manager
 - **No download exploits:** PDF.js disables print/save, signed URLs expire, watermark on PDF stream (future)
 - **Performance:** Core Web Vitals target Green across all pages
-- **Testing:** Unit tests per module, Integration tests for critical flows (auth, payment, access control)
+- **Testing strategy:**
+  - Always run `npm run build` in both `apps/api` and `apps/web` before pushing — catches TypeScript errors locally before burning a deploy cycle
+  - Unit tests for pure business logic: OTP expiry, password rules, permission checks, price calculations
+  - Integration tests for critical flows: register → verify → login, payment approval → library access granted
+  - Skip unit tests for thin handlers/controllers that only pass data through (no logic to test)
+  - Do NOT chase 99-100% coverage — mocks hide real SDK behavior (e.g. Resend SDK returns `{error}` instead of throwing; a mock that throws gives false confidence)
+  - When a bug escapes to production, add a test that would have caught it
 
 ---
 
