@@ -22,16 +22,16 @@ export class NotificationService {
       return;
     }
 
-    try {
-      await this.resend.emails.send({
-        from: this.fromEmail,
-        to: email,
-        subject: 'Your Twon verification code',
-        html: this.buildOtpEmailHtml(displayName, otp),
-      });
-    } catch (error) {
-      // Fire-and-forget — never throw to callers (same pattern as EagleLogger in .NET)
-      this.logger.warn(`Failed to send OTP email to ${email}: ${error}`);
+    const { error } = await this.resend.emails.send({
+      from: this.fromEmail,
+      to: email,
+      subject: 'Your Twon verification code',
+      html: this.buildOtpEmailHtml(displayName, otp),
+    });
+    if (error) {
+      this.logger.warn(`Failed to send OTP email to ${email}: ${JSON.stringify(error)}`);
+    } else {
+      this.logger.log(`OTP email sent to ${email}`);
     }
   }
 
@@ -43,15 +43,16 @@ export class NotificationService {
       return;
     }
 
-    try {
-      await this.resend.emails.send({
-        from: this.fromEmail,
-        to: email,
-        subject: 'Reset your Twon password',
-        html: this.buildForgotPasswordEmailHtml(otp),
-      });
-    } catch (error) {
-      this.logger.warn(`Failed to send reset OTP email to ${email}: ${error}`);
+    const { error } = await this.resend.emails.send({
+      from: this.fromEmail,
+      to: email,
+      subject: 'Reset your Twon password',
+      html: this.buildForgotPasswordEmailHtml(otp),
+    });
+    if (error) {
+      this.logger.warn(`Failed to send reset OTP email to ${email}: ${JSON.stringify(error)}`);
+    } else {
+      this.logger.log(`Reset OTP email sent to ${email}`);
     }
   }
 
