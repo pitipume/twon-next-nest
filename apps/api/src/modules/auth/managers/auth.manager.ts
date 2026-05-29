@@ -51,6 +51,12 @@ export class AuthManager {
     otp: string,
     password: string,
   ): Promise<ManagerResult<AuthData>> {
+    // Check if already verified before touching OTP
+    const existingUser = await this.service.findUserByEmail(email);
+    if (existingUser?.isEmailVerified) {
+      return { success: false, message: 'ALREADY_VERIFIED' };
+    }
+
     const otpResult = await this.service.verifyOtp(email, otp);
     if (!otpResult.valid) {
       return { success: false, message: otpResult.message };
@@ -63,12 +69,6 @@ export class AuthManager {
         success: false,
         message: 'Registration session expired. Please start again.',
       };
-    }
-
-    // Guard against race condition — check email again before creating
-    const existingUser = await this.service.findUserByEmail(email);
-    if (existingUser?.isEmailVerified) {
-      return { success: false, message: 'An account with this email already exists.' };
     }
 
     // Delete unverified account so createUser can proceed cleanly

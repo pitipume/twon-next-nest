@@ -87,6 +87,11 @@ export default function VerifyPage() {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
         'Invalid OTP.';
+      if (message === 'ALREADY_VERIFIED') {
+        toast.success('Account already verified — please log in.');
+        router.push('/auth/login');
+        return;
+      }
       toast.error(message);
     } finally {
       setLoading(false);
