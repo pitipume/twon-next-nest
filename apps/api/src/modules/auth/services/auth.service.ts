@@ -36,6 +36,10 @@ export class AuthService {
     return this.repository.findUserById(id);
   }
 
+  async deleteUser(userId: string): Promise<void> {
+    await this.repository.deleteUser(userId);
+  }
+
   async createUser(email: string, displayName: string, password: string) {
     const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
     return this.repository.createUser({ email, displayName, passwordHash });

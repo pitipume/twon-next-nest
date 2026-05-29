@@ -14,6 +14,10 @@ export class AuthRepository {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
+  async deleteUser(userId: string): Promise<void> {
+    await this.prisma.user.delete({ where: { id: userId } });
+  }
+
   async createUser(data: {
     email: string;
     displayName: string;

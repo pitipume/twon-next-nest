@@ -29,7 +29,7 @@ export class AuthManager {
     displayName: string,
   ): Promise<ManagerResult> {
     const existingUser = await this.service.findUserByEmail(email);
-    if (existingUser) {
+    if (existingUser?.isEmailVerified) {
       return { success: false, message: 'An account with this email already exists.' };
     }
 
@@ -67,8 +67,13 @@ export class AuthManager {
 
     // Guard against race condition — check email again before creating
     const existingUser = await this.service.findUserByEmail(email);
-    if (existingUser) {
+    if (existingUser?.isEmailVerified) {
       return { success: false, message: 'An account with this email already exists.' };
+    }
+
+    // Delete unverified account so createUser can proceed cleanly
+    if (existingUser && !existingUser.isEmailVerified) {
+      await this.service.deleteUser(existingUser.id);
     }
 
     const user = await this.service.createUser(email, displayName, password);
