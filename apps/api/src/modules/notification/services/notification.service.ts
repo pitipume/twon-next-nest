@@ -9,13 +9,13 @@ export class NotificationService {
   private readonly fromEmail: string;
 
   constructor(private readonly config: ConfigService) {
-    this.resend = new Resend(this.config.get('RESEND_API_KEY'));
+    this.resend = new Resend(this.config.get('RESEND_API_KEY') ?? 'disabled');
     this.fromEmail = this.config.get('EMAIL_FROM', 'noreply@twon-platform.com');
   }
 
   async sendOtpEmail(email: string, displayName: string, otp: string): Promise<void> {
-    // DEV MODE: log OTP to console when no API key configured
-    if (!this.config.get('RESEND_API_KEY')) {
+    const apiKey = this.config.get('RESEND_API_KEY');
+    if (!apiKey || apiKey === 'disabled') {
       this.logger.warn('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       this.logger.warn(`  DEV OTP for ${email}: ${otp}`);
       this.logger.warn('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -36,7 +36,8 @@ export class NotificationService {
   }
 
   async sendForgotPasswordEmail(email: string, otp: string): Promise<void> {
-    if (!this.config.get('RESEND_API_KEY')) {
+    const apiKey = this.config.get('RESEND_API_KEY');
+    if (!apiKey || apiKey === 'disabled') {
       this.logger.warn('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       this.logger.warn(`  DEV RESET OTP for ${email}: ${otp}`);
       this.logger.warn('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
