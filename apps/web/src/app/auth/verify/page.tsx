@@ -99,7 +99,7 @@ export default function VerifyPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4">
+    <div className="flex min-h-dvh flex-col items-center justify-center px-4 py-8 overflow-y-auto">
       <div className="w-full max-w-sm space-y-6">
         <div className="space-y-1 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
