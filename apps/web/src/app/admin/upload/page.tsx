@@ -163,7 +163,10 @@ export default function UploadPage() {
       </div>
 
       {uploadType === 'ebook' ? (
-        <form onSubmit={ebookForm.handleSubmit(onSubmitEbook)} className="space-y-4">
+        <form onSubmit={ebookForm.handleSubmit(onSubmitEbook, () => {
+          if (!pdfFile) setPdfError('PDF file is required');
+          toast.error('Please fill in all required fields.');
+        })} className="space-y-4">
           <div className="flex flex-col gap-1.5">
             <RequiredLabel>Title</RequiredLabel>
             <input
@@ -246,7 +249,10 @@ export default function UploadPage() {
           </Button>
         </form>
       ) : (
-        <form onSubmit={tarotForm.handleSubmit(onSubmitTarot)} className="space-y-4">
+        <form onSubmit={tarotForm.handleSubmit(onSubmitTarot, () => {
+          if (!zipFile) setZipError('ZIP file is required');
+          toast.error('Please fill in all required fields.');
+        })} className="space-y-4">
           <div className="flex flex-col gap-1.5">
             <RequiredLabel>Deck name</RequiredLabel>
             <input
