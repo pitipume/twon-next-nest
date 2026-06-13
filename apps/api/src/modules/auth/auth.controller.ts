@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import type { Request, Response } from 'express';
 import { InitiateRegisterDto } from './dto/initiate-register.dto';
@@ -14,6 +14,10 @@ import { ForgotPasswordCommand } from './commands/forgot-password/forgot-passwor
 import { ResetPasswordCommand } from './commands/reset-password/reset-password.command';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateProfileCommand } from './commands/update-profile/update-profile.command';
+import { ChangePasswordCommand } from './commands/change-password/change-password.command';
 
 const REFRESH_TOKEN_COOKIE = 'refresh_token';
 const isProd = process.env.NODE_ENV === 'production';
@@ -117,6 +121,22 @@ export class AuthController {
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.commandBus.execute(
       new ResetPasswordCommand(dto.email, dto.otp, dto.newPassword),
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('profile')
+  updateProfile(@Body() dto: UpdateProfileDto, @Req() req: Request) {
+    const userId = (req as any).user.id;
+    return this.commandBus.execute(new UpdateProfileCommand(userId, dto.displayName));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('profile/password')
+  changePassword(@Body() dto: ChangePasswordDto, @Req() req: Request) {
+    const userId = (req as any).user.id;
+    return this.commandBus.execute(
+      new ChangePasswordCommand(userId, dto.currentPassword, dto.newPassword),
     );
   }
 

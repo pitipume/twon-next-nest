@@ -173,6 +173,34 @@ export class AuthManager {
     // Note: access token expires naturally (15min) — no server-side revocation needed
   }
 
+  // ─── Update display name ──────────────────────────────────────────────────
+
+  async updateProfile(userId: string, displayName: string): Promise<ManagerResult<{ displayName: string }>> {
+    await this.service.updateDisplayName(userId, displayName);
+    return { success: true, data: { displayName } };
+  }
+
+  // ─── Change password (logged-in user) ─────────────────────────────────────
+
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<ManagerResult> {
+    const user = await this.service.findUserById(userId);
+    if (!user || !user.isActive) {
+      return { success: false, message: 'Account not found.' };
+    }
+
+    const valid = await this.service.verifyPassword(currentPassword, user.passwordHash);
+    if (!valid) {
+      return { success: false, message: 'Current password is incorrect.' };
+    }
+
+    await this.service.updateUserPassword(userId, newPassword);
+    return { success: true };
+  }
+
   // ─── Private helpers ─────────────────────────────────────────────────────
 
   private buildAuthData(user: User, tokens: TokenPair): AuthData {

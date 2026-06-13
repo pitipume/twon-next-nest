@@ -54,6 +54,10 @@ export class AuthService {
     await this.repository.updateUserPassword(userId, passwordHash);
   }
 
+  async updateDisplayName(userId: string, displayName: string): Promise<void> {
+    await this.repository.updateDisplayName(userId, displayName);
+  }
+
   // ─── OTP ───────────────────────────────────────────────────────────────────
 
   generateOtp(): string {

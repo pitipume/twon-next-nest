@@ -37,6 +37,10 @@ export class AuthRepository {
     await this.prisma.user.update({ where: { id: userId }, data: { passwordHash } });
   }
 
+  async updateDisplayName(userId: string, displayName: string): Promise<void> {
+    await this.prisma.user.update({ where: { id: userId }, data: { displayName } });
+  }
+
   async createRefreshToken(data: {
     userId: string;
     tokenHash: string;

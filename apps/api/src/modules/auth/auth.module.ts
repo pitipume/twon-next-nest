@@ -17,6 +17,8 @@ import { RefreshTokenHandler } from './commands/refresh-token/refresh-token.hand
 import { LogoutHandler } from './commands/logout/logout.handler';
 import { ForgotPasswordHandler } from './commands/forgot-password/forgot-password.handler';
 import { ResetPasswordHandler } from './commands/reset-password/reset-password.handler';
+import { UpdateProfileHandler } from './commands/update-profile/update-profile.handler';
+import { ChangePasswordHandler } from './commands/change-password/change-password.handler';
 
 const CommandHandlers = [
   InitiateRegisterHandler,
@@ -26,6 +28,8 @@ const CommandHandlers = [
   LogoutHandler,
   ForgotPasswordHandler,
   ResetPasswordHandler,
+  UpdateProfileHandler,
+  ChangePasswordHandler,
 ];
 
 @Module({
