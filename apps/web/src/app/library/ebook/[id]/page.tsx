@@ -133,8 +133,7 @@ export default function EbookReaderPage() {
   const total = numPages || session.totalPages;
 
   return (
-    // 100dvh = dynamic viewport height — shrinks when mobile browser chrome (address bar) is visible
-    <div className="flex flex-col h-[calc(100dvh-56px)]">
+    <div className="flex flex-col h-[calc(100svh-56px)]">
       {/* Toolbar */}
       <div className="flex items-center gap-2 border-b border-[var(--border)] px-3 py-2 bg-[var(--background)]">
         {/* Mode toggle */}
@@ -191,7 +190,7 @@ export default function EbookReaderPage() {
       {/* PDF viewer */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-auto bg-zinc-100 dark:bg-zinc-900 select-none"
+        className="flex-1 min-h-0 overflow-auto bg-zinc-100 dark:bg-zinc-900 select-none"
         onContextMenu={(e) => e.preventDefault()}
         onTouchStart={mode === 'page' ? onTouchStart : undefined}
         onTouchEnd={mode === 'page' ? onTouchEnd : undefined}
@@ -200,6 +199,14 @@ export default function EbookReaderPage() {
             file={session.pdfUrl}
             onLoadSuccess={onDocumentLoad}
             loading={<DocLoader />}
+            error={
+              <div className="flex flex-col items-center gap-2 py-20 text-sm text-red-500">
+                <span>Failed to load PDF.</span>
+                <button onClick={() => window.location.reload()} className="underline text-violet-600">
+                  Tap to retry
+                </button>
+              </div>
+            }
           >
             {mode === 'page' ? (
               // key={currentPage} forces a fresh canvas on page change — fixes black-page bug
