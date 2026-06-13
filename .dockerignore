@@ -4,6 +4,7 @@ node_modules
 apps/web
 apps/api/dist
 apps/api/node_modules
+**/*.tsbuildinfo
 *.log
 .env
 .env.*
