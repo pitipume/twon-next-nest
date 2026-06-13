@@ -74,6 +74,17 @@ export class StorageService {
     );
   }
 
+  async download(key: string): Promise<Buffer> {
+    const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
+    const { Body } = await this.client.send(command);
+    if (!Body) throw new Error(`Empty R2 response for key: ${key}`);
+    const chunks: Uint8Array[] = [];
+    for await (const chunk of Body as AsyncIterable<Uint8Array>) {
+      chunks.push(chunk);
+    }
+    return Buffer.concat(chunks);
+  }
+
   async delete(key: string): Promise<void> {
     try {
       await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));

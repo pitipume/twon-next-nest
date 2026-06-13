@@ -16,31 +16,67 @@ export class AdminService {
     private readonly catalog: CatalogRepository,
   ) {}
 
-  // ─── Ebook upload ─────────────────────────────────────────────────────────
+  // ─── Presigned upload URL generation ────────────────────────────────────
+
+  async getEbookUploadUrls(uploadId: string) {
+    const pdfKey = this.storage.buildKey.ebookFile(uploadId, 'ebook.pdf');
+    const coverKey = this.storage.buildKey.ebookCover(uploadId);
+    const TTL = 15 * 60; // 15 minutes to complete the upload
+
+    const [pdfUrl, coverUrl] = await Promise.all([
+      this.storage.getSignedUploadUrl(pdfKey, 'application/pdf', TTL),
+      this.storage.getSignedUploadUrl(coverKey, 'image/webp', TTL),
+    ]);
+
+    return {
+      pdf: { url: pdfUrl, key: pdfKey },
+      cover: { url: coverUrl, key: coverKey },
+    };
+  }
+
+  async getTarotUploadUrls(uploadId: string) {
+    const zipKey = `tarot/uploads/${uploadId}.zip`;
+    const coverKey = this.storage.buildKey.tarotCover(uploadId);
+    const backKey = this.storage.buildKey.tarotBack(uploadId);
+    const TTL = 15 * 60;
+
+    const [zipUrl, coverUrl, backUrl] = await Promise.all([
+      this.storage.getSignedUploadUrl(zipKey, 'application/zip', TTL),
+      this.storage.getSignedUploadUrl(coverKey, 'image/webp', TTL),
+      this.storage.getSignedUploadUrl(backKey, 'image/webp', TTL),
+    ]);
+
+    return {
+      zip: { url: zipUrl, key: zipKey },
+      cover: { url: coverUrl, key: coverKey },
+      back: { url: backUrl, key: backKey },
+    };
+  }
+
+  // ─── Ebook upload (confirm after direct R2 upload) ────────────────────────
 
   async uploadEbook(params: {
     title: string;
     author: string;
-    description: string;
+    description?: string;
     priceTHB: number;
     previewPages: number;
     language: string;
     categories: string[];
     tags: string[];
     adminId: string;
-    pdfBuffer: Buffer;
-    pdfOriginalName: string;
-    coverBuffer?: Buffer;
+    pdfKey: string;
+    coverKey?: string;
+    totalPages?: number;
   }) {
-    // 1. Create the MongoDB ebook doc first (placeholder fileKey)
-    const tempMongoId = 'temp';
+    // 1. Create MongoDB ebook doc with the R2 keys (files already uploaded by client)
     const ebook = await this.catalog.createEbook({
       title: params.title,
       author: params.author,
-      description: params.description,
-      coverImageUrl: '',
-      fileKey: tempMongoId,
-      totalPages: 0, // will update when we can count pages
+      description: params.description ?? '',
+      coverImageUrl: params.coverKey ?? '',
+      fileKey: params.pdfKey,
+      totalPages: params.totalPages ?? 0,
       language: params.language,
       categories: params.categories,
       tags: params.tags,
@@ -51,26 +87,7 @@ export class AdminService {
 
     const mongoId = ebook._id.toString();
 
-    // 2. Upload PDF to R2
-    const fileKey = this.storage.buildKey.ebookFile(mongoId, 'ebook.pdf');
-    await this.storage.upload(fileKey, params.pdfBuffer, 'application/pdf');
-
-    // 3. Upload cover image (if provided), convert to webp
-    let coverImageUrl = '';
-    if (params.coverBuffer) {
-      const webpBuffer = await sharp(params.coverBuffer)
-        .resize(400, 600, { fit: 'cover' })
-        .webp({ quality: 85 })
-        .toBuffer();
-      const coverKey = this.storage.buildKey.ebookCover(mongoId);
-      await this.storage.upload(coverKey, webpBuffer, 'image/webp');
-      coverImageUrl = coverKey; // store the key — signed URLs are generated fresh at read time
-    }
-
-    // 4. Update ebook doc with real fileKey + coverImageUrl
-    await this.catalog.updateEbookById(mongoId, { fileKey, coverImageUrl });
-
-    // 5. Create Prisma product record (for pricing + catalog)
+    // 2. Create Prisma product record
     const product = await this.prisma.product.create({
       data: {
         mongoRefId: mongoId,
@@ -81,29 +98,29 @@ export class AdminService {
       },
     });
 
-    // 6. Update Mongo doc with postgres product id
+    // 3. Link Postgres product ID back to MongoDB
     await this.catalog.updateEbookById(mongoId, { postgresProductId: product.id });
 
     return { productId: product.id, mongoId };
   }
 
-  // ─── Tarot deck upload (ZIP) ──────────────────────────────────────────────
+  // ─── Tarot deck upload (ZIP downloaded from R2, processed server-side) ────
 
   async uploadTarotDeck(params: {
     name: string;
-    description: string;
+    description?: string;
     priceTHB: number;
     adminId: string;
-    zipBuffer: Buffer;
-    coverBuffer?: Buffer;
-    backBuffer?: Buffer;
+    zipKey: string;
+    coverKey?: string;
+    backKey?: string;
   }) {
     // 1. Create MongoDB deck doc (empty cards, will populate from ZIP)
     const deck = await this.catalog.createTarotDeck({
       name: params.name,
-      description: params.description,
-      coverImageUrl: '',
-      backImageKey: '',
+      description: params.description ?? '',
+      coverImageUrl: params.coverKey ?? '',
+      backImageKey: params.backKey ?? '',
       cardCount: 0,
       isPublished: false,
       createdBy: params.adminId,
@@ -112,15 +129,22 @@ export class AdminService {
 
     const mongoId = deck._id.toString();
 
-    // 2. Parse ZIP — expected naming: 00_the_fool.webp, 01_the_magician.webp...
-    const zip = new AdmZip(params.zipBuffer);
+    // 2. Download ZIP from R2 (client uploaded it directly)
+    this.logger.log(`Downloading ZIP from R2: ${params.zipKey}`);
+    const zipBuffer = await this.storage.download(params.zipKey);
+
+    // 3. Delete the temporary ZIP (no longer needed after download)
+    await this.storage.delete(params.zipKey);
+
+    // 4. Parse ZIP — expected naming: 00_the_fool.webp, 01_the_magician.webp...
+    const zip = new AdmZip(zipBuffer);
     const entries = zip.getEntries()
       .filter((e) => !e.isDirectory && /\.(png|jpg|jpeg|webp)$/i.test(e.name))
       .sort((a, b) => a.name.localeCompare(b.name));
 
     this.logger.log(`Processing ${entries.length} card images from ZIP`);
 
-    // 3. Upload each card image to R2 (convert to webp for consistency)
+    // 5. Upload each card image to R2 (convert to webp for consistency)
     const cards = await Promise.all(
       entries.map(async (entry, index) => {
         const raw = entry.getData();
@@ -148,27 +172,13 @@ export class AdminService {
       }),
     );
 
-    // 4. Upload cover + back images
-    let coverImageUrl = '';
-    let backImageKey = '';
+    // 6. Update MongoDB deck with all card data
+    await this.catalog.updateTarotDeckById(mongoId, {
+      cards,
+      cardCount: cards.length,
+    });
 
-    if (params.coverBuffer) {
-      const webp = await sharp(params.coverBuffer).resize(400, 600, { fit: 'cover' }).webp({ quality: 85 }).toBuffer();
-      const key = this.storage.buildKey.tarotCover(mongoId);
-      await this.storage.upload(key, webp, 'image/webp');
-      coverImageUrl = key; // store the key — signed URLs are generated fresh at read time
-    }
-
-    if (params.backBuffer) {
-      const webp = await sharp(params.backBuffer).resize(400, 700, { fit: 'cover' }).webp({ quality: 85 }).toBuffer();
-      backImageKey = this.storage.buildKey.tarotBack(mongoId);
-      await this.storage.upload(backImageKey, webp, 'image/webp');
-    }
-
-    // 5. Update MongoDB deck with all card data
-    await this.catalog.updateTarotDeckById(mongoId, { cards, cardCount: cards.length, coverImageUrl, backImageKey });
-
-    // 6. Create Prisma product record
+    // 7. Create Prisma product record
     const product = await this.prisma.product.create({
       data: {
         mongoRefId: mongoId,

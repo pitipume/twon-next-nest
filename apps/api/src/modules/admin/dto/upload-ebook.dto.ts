@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, Min } from 'class-validator';
+import { IsInt, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, Min } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
 export class UploadEbookDto {
@@ -12,16 +12,16 @@ export class UploadEbookDto {
   @Transform(({ value }) => value?.trim())
   author: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  description: string;
+  description?: string;
 
   @IsNumber()
   @IsPositive()
   @Type(() => Number)
   priceTHB: number;
 
-  @IsNumber()
+  @IsInt()
   @Min(0)
   @Type(() => Number)
   previewPages: number;
@@ -37,4 +37,19 @@ export class UploadEbookDto {
   @IsOptional()
   @IsString()
   tags?: string; // comma-separated
+
+  // R2 keys set by the client after direct upload
+  @IsString()
+  @IsNotEmpty()
+  pdfKey: string;
+
+  @IsOptional()
+  @IsString()
+  coverKey?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Type(() => Number)
+  totalPages?: number;
 }

@@ -9,12 +9,12 @@ import {
   Post,
   Put,
   UploadedFile,
-  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UserRole } from '@prisma/client';
+import { randomUUID } from 'crypto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -30,24 +30,18 @@ import { SetPaymentConfigDto } from './dto/set-payment-config.dto';
 export class AdminController {
   constructor(private readonly service: AdminService) {}
 
-  // POST /api/admin/ebooks — multipart: pdf (required) + cover (optional)
+  // POST /api/admin/ebooks/upload-urls — get presigned PUT URLs for direct R2 upload
+  @Post('ebooks/upload-urls')
+  getEbookUploadUrls() {
+    return this.service.getEbookUploadUrls(randomUUID());
+  }
+
+  // POST /api/admin/ebooks — confirm upload; body is JSON with R2 keys
   @Post('ebooks')
-  @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'pdf', maxCount: 1 },
-      { name: 'cover', maxCount: 1 },
-    ]),
-  )
   async uploadEbook(
     @Body() dto: UploadEbookDto,
     @CurrentUser() user: { id: string },
-    @UploadedFiles()
-    files: { pdf?: Express.Multer.File[]; cover?: Express.Multer.File[] },
   ) {
-    if (!files?.pdf?.[0]) {
-      return { code: 'A002', status: 'failure', message: 'PDF file is required.' };
-    }
-
     const result = await this.service.uploadEbook({
       title: dto.title,
       author: dto.author,
@@ -58,45 +52,34 @@ export class AdminController {
       categories: dto.categories ? dto.categories.split(',').map((s) => s.trim()) : [],
       tags: dto.tags ? dto.tags.split(',').map((s) => s.trim()) : [],
       adminId: user.id,
-      pdfBuffer: files.pdf[0].buffer,
-      pdfOriginalName: files.pdf[0].originalname,
-      coverBuffer: files.cover?.[0]?.buffer,
+      pdfKey: dto.pdfKey,
+      coverKey: dto.coverKey || undefined,
+      totalPages: dto.totalPages ?? 0,
     });
 
     return { code: 'A001', status: 'success', data: result };
   }
 
-  // POST /api/admin/tarot-decks — multipart: zip (required) + cover + back (optional)
+  // POST /api/admin/tarot-decks/upload-urls — get presigned PUT URLs
+  @Post('tarot-decks/upload-urls')
+  getTarotUploadUrls() {
+    return this.service.getTarotUploadUrls(randomUUID());
+  }
+
+  // POST /api/admin/tarot-decks — confirm upload; ZIP is downloaded from R2 and processed
   @Post('tarot-decks')
-  @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'zip', maxCount: 1 },
-      { name: 'cover', maxCount: 1 },
-      { name: 'back', maxCount: 1 },
-    ]),
-  )
   async uploadTarotDeck(
     @Body() dto: UploadTarotDeckDto,
     @CurrentUser() user: { id: string },
-    @UploadedFiles()
-    files: {
-      zip?: Express.Multer.File[];
-      cover?: Express.Multer.File[];
-      back?: Express.Multer.File[];
-    },
   ) {
-    if (!files?.zip?.[0]) {
-      return { code: 'A002', status: 'failure', message: 'ZIP file is required.' };
-    }
-
     const result = await this.service.uploadTarotDeck({
       name: dto.name,
       description: dto.description,
       priceTHB: dto.priceTHB,
       adminId: user.id,
-      zipBuffer: files.zip[0].buffer,
-      coverBuffer: files.cover?.[0]?.buffer,
-      backBuffer: files.back?.[0]?.buffer,
+      zipKey: dto.zipKey,
+      coverKey: dto.coverKey || undefined,
+      backKey: dto.backKey || undefined,
     });
 
     return { code: 'A001', status: 'success', data: result };
@@ -142,7 +125,7 @@ export class AdminController {
     });
   }
 
-  // POST /api/admin/payment-config/qr — upload PromptPay QR image
+  // POST /api/admin/payment-config/qr — upload PromptPay QR image (still multipart, small file)
   @Post('payment-config/qr')
   @UseInterceptors(FileInterceptor('file'))
   async uploadPaymentQr(@UploadedFile() file: Express.Multer.File) {
