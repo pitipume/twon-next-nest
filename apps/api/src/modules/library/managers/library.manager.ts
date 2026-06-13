@@ -26,7 +26,7 @@ export class LibraryManager {
       }));
     }
 
-    const items = await this.service.getUserLibrary(userId);
+    const items = await this.service.getUserLibraryEnriched(userId);
     return items.map((item) => ({
       id: item.id,
       productId: item.productId,

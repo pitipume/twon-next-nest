@@ -11,6 +11,30 @@ import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
+async function pdfFirstPageToFile(pdf: File): Promise<File | null> {
+  try {
+    const pdfjsLib = await import('pdfjs-dist');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+    const arrayBuffer = await pdf.arrayBuffer();
+    const doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const page = await doc.getPage(1);
+    const viewport = page.getViewport({ scale: 2 });
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await page.render({ canvasContext: canvas.getContext('2d') as any, viewport }).promise;
+    return new Promise((resolve) =>
+      canvas.toBlob(
+        (blob) => resolve(blob ? new File([blob], 'auto-cover.webp', { type: 'image/webp' }) : null),
+        'image/webp',
+        0.85,
+      ),
+    );
+  } catch {
+    return null;
+  }
+}
+
 type UploadType = 'ebook' | 'tarot';
 
 const ebookSchema = z.object({
@@ -97,10 +121,25 @@ export default function UploadPage() {
   const [uploadType, setUploadType] = useState<UploadType>('ebook');
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [autoCover, setAutoCover] = useState<File | null>(null);
+  const [generatingCover, setGeneratingCover] = useState(false);
   const [zipFile, setZipFile] = useState<File | null>(null);
   const [backFile, setBackFile] = useState<File | null>(null);
   const [pdfError, setPdfError] = useState<string | null>(null);
   const [zipError, setZipError] = useState<string | null>(null);
+
+  async function handlePdfChange(file: File | null) {
+    setPdfFile(file);
+    if (file) {
+      setPdfError(null);
+      setGeneratingCover(true);
+      const thumb = await pdfFirstPageToFile(file);
+      setAutoCover(thumb);
+      setGeneratingCover(false);
+    } else {
+      setAutoCover(null);
+    }
+  }
 
   const ebookForm = useForm<EbookForm>({ resolver: zodResolver(ebookSchema) });
   const tarotForm = useForm<TarotForm>({ resolver: zodResolver(tarotSchema) });
@@ -111,7 +150,8 @@ export default function UploadPage() {
     const form = new FormData();
     Object.entries(data).forEach(([k, v]) => v !== undefined && form.append(k, String(v)));
     form.append('pdf', pdfFile);
-    if (coverFile) form.append('cover', coverFile);
+    const effectiveCover = coverFile ?? autoCover;
+    if (effectiveCover) form.append('cover', effectiveCover);
     try {
       await api.post('/admin/ebooks', form, { headers: { 'Content-Type': 'multipart/form-data' } });
       toast.success('Ebook uploaded!');
@@ -235,12 +275,13 @@ export default function UploadPage() {
             file={pdfFile}
             icon={FileText}
             error={pdfError}
-            onChange={(f) => { setPdfFile(f); if (f) setPdfError(null); }}
+            onChange={handlePdfChange}
           />
 
           <FilePickerButton
             label="Cover image"
             accept="image/*"
+            hint={generatingCover ? 'Generating from page 1…' : autoCover && !coverFile ? 'Using page 1 as cover (auto)' : undefined}
             file={coverFile}
             icon={Image}
             onChange={setCoverFile}

@@ -23,14 +23,32 @@ export class LibraryService {
     return this.repository.userOwnsProduct(userId, productId);
   }
 
+  private async enrichWithCovers<T extends { mongoRefId: string }>(products: T[]): Promise<(T & { coverImageUrl: string })[]> {
+    if (!products.length) return products.map((p) => ({ ...p, coverImageUrl: '' }));
+    const coverMap = await this.catalogRepository.findCoverImageUrls(products.map((p) => p.mongoRefId));
+    return products.map((p) => ({ ...p, coverImageUrl: coverMap.get(p.mongoRefId) ?? '' }));
+  }
+
   async getAllProductsForAdmin() {
-    return this.repository.getAllProducts();
+    const products = await this.repository.getAllProducts();
+    return this.enrichWithCovers(products);
   }
 
   async getCreatedProducts(userId: string) {
     const productIds = await this.catalogRepository.findProductIdsByCreator(userId);
     if (!productIds.length) return [];
-    return this.repository.getProductsByIds(productIds);
+    const products = await this.repository.getProductsByIds(productIds);
+    return this.enrichWithCovers(products);
+  }
+
+  async getUserLibraryEnriched(userId: string) {
+    const items = await this.repository.getUserLibrary(userId);
+    if (!items.length) return items.map((i) => ({ ...i, product: { ...i.product, coverImageUrl: '' } }));
+    const coverMap = await this.catalogRepository.findCoverImageUrls(items.map((i) => i.product.mongoRefId));
+    return items.map((i) => ({
+      ...i,
+      product: { ...i.product, coverImageUrl: coverMap.get(i.product.mongoRefId) ?? '' },
+    }));
   }
 
   async userCreatedProduct(userId: string, productId: string): Promise<boolean> {
@@ -52,7 +70,7 @@ export class LibraryService {
     ]);
 
     return {
-      signedUrl,
+      pdfUrl: signedUrl,
       currentPage: progress?.currentPage ?? 1,
       totalPages: ebook.totalPages,
       percentComplete: progress?.percentComplete ?? 0,

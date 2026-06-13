@@ -142,6 +142,17 @@ export class CatalogRepository {
     return this.prisma.product.findUnique({ where: { mongoRefId } });
   }
 
+  async findCoverImageUrls(mongoRefIds: string[]): Promise<Map<string, string>> {
+    const [ebooks, decks] = await Promise.all([
+      this.ebookModel.find({ _id: { $in: mongoRefIds } }, { coverImageUrl: 1 }).lean().exec(),
+      this.tarotModel.find({ _id: { $in: mongoRefIds } }, { coverImageUrl: 1 }).lean().exec(),
+    ]);
+    const map = new Map<string, string>();
+    ebooks.forEach((e) => map.set((e as any)._id.toString(), (e as any).coverImageUrl ?? ''));
+    decks.forEach((d) => map.set((d as any)._id.toString(), (d as any).coverImageUrl ?? ''));
+    return map;
+  }
+
   async findProductIdsByCreator(userId: string): Promise<string[]> {
     const [ebooks, decks] = await Promise.all([
       this.ebookModel.find({ createdBy: userId, postgresProductId: { $ne: null } }, { postgresProductId: 1 }).lean().exec(),
