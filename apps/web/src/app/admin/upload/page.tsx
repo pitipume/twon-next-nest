@@ -116,8 +116,9 @@ export default function UploadPage() {
       await api.post('/admin/ebooks', form, { headers: { 'Content-Type': 'multipart/form-data' } });
       toast.success('Ebook uploaded!');
       router.push('/admin');
-    } catch {
-      toast.error('Upload failed.');
+    } catch (err: any) {
+      const msg = err?.response?.data?.message ?? 'Upload failed. Check console for details.';
+      toast.error(Array.isArray(msg) ? msg.join(', ') : msg);
     }
   }
 
@@ -133,8 +134,9 @@ export default function UploadPage() {
       await api.post('/admin/tarot-decks', form, { headers: { 'Content-Type': 'multipart/form-data' } });
       toast.success('Tarot deck uploaded!');
       router.push('/admin');
-    } catch {
-      toast.error('Upload failed.');
+    } catch (err: any) {
+      const msg = err?.response?.data?.message ?? 'Upload failed. Check console for details.';
+      toast.error(Array.isArray(msg) ? msg.join(', ') : msg);
     }
   }
 
