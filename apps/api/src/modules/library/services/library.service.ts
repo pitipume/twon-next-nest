@@ -23,6 +23,13 @@ export class LibraryService {
     return this.repository.userOwnsProduct(userId, productId);
   }
 
+  async userCreatedProduct(userId: string, productId: string): Promise<boolean> {
+    const ebook = await this.catalogRepository.findEbookByProductId(productId);
+    if (ebook) return ebook.createdBy === userId;
+    const deck = await this.catalogRepository.findTarotDeckByProductId(productId);
+    return deck?.createdBy === userId;
+  }
+
   // ─── Ebook reading session ────────────────────────────────────────────────
 
   async getEbookSession(userId: string, productId: string) {

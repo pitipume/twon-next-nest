@@ -8,7 +8,7 @@ export class GetTarotSessionHandler implements IQueryHandler<GetTarotSessionQuer
   constructor(private readonly manager: LibraryManager) {}
 
   async execute(query: GetTarotSessionQuery) {
-    const result = await this.manager.getTarotSession(query.userId, query.productId);
+    const result = await this.manager.getTarotSession(query.userId, query.role, query.productId);
     if (!result.success) return ApiResponse.failure(result.message);
     return ApiResponse.success(result.data);
   }

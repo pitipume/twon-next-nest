@@ -8,7 +8,7 @@ export class GetReadingSessionHandler implements IQueryHandler<GetReadingSession
   constructor(private readonly manager: LibraryManager) {}
 
   async execute(query: GetReadingSessionQuery) {
-    const result = await this.manager.getEbookSession(query.userId, query.productId);
+    const result = await this.manager.getEbookSession(query.userId, query.role, query.productId);
     if (!result.success) return ApiResponse.failure(result.message);
     return ApiResponse.success(result.data);
   }

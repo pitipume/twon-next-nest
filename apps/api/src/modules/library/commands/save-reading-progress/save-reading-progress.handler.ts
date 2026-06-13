@@ -10,6 +10,7 @@ export class SaveReadingProgressHandler implements ICommandHandler<SaveReadingPr
   async execute(command: SaveReadingProgressCommand) {
     const result = await this.manager.saveProgress(
       command.userId,
+      command.role,
       command.productId,
       command.currentPage,
       command.totalPages,

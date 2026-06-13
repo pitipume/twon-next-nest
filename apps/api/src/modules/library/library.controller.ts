@@ -18,37 +18,37 @@ export class LibraryController {
 
   // GET /api/library — user's owned items
   @Get()
-  getLibrary(@CurrentUser() user: { id: string }) {
+  getLibrary(@CurrentUser() user: { id: string; role: string }) {
     return this.queryBus.execute(new GetLibraryQuery(user.id));
   }
 
   // GET /api/library/ebooks/:productId/session — signed URL + reading position
   @Get('ebooks/:productId/session')
   getEbookSession(
-    @CurrentUser() user: { id: string },
+    @CurrentUser() user: { id: string; role: string },
     @Param('productId') productId: string,
   ) {
-    return this.queryBus.execute(new GetReadingSessionQuery(user.id, productId));
+    return this.queryBus.execute(new GetReadingSessionQuery(user.id, user.role, productId));
   }
 
   // POST /api/library/ebooks/:productId/progress — auto-save reading position
   @Post('ebooks/:productId/progress')
   saveProgress(
-    @CurrentUser() user: { id: string },
+    @CurrentUser() user: { id: string; role: string },
     @Param('productId') productId: string,
     @Body() dto: SaveProgressDto,
   ) {
     return this.commandBus.execute(
-      new SaveReadingProgressCommand(user.id, productId, dto.currentPage, dto.totalPages),
+      new SaveReadingProgressCommand(user.id, user.role, productId, dto.currentPage, dto.totalPages),
     );
   }
 
   // GET /api/library/tarot-decks/:productId/session — signed card URLs for shuffle
   @Get('tarot-decks/:productId/session')
   getTarotSession(
-    @CurrentUser() user: { id: string },
+    @CurrentUser() user: { id: string; role: string },
     @Param('productId') productId: string,
   ) {
-    return this.queryBus.execute(new GetTarotSessionQuery(user.id, productId));
+    return this.queryBus.execute(new GetTarotSessionQuery(user.id, user.role, productId));
   }
 }
