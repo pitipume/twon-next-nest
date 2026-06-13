@@ -21,35 +21,35 @@ export default function EbookReaderPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [mode, setMode] = useState<ReadMode>(() => {
     if (typeof window !== 'undefined') {
-      return (localStorage.getItem('ebook-read-mode') as ReadMode) ?? 'page';
+      return (localStorage.getItem('ebook-read-mode') as ReadMode) ?? 'scroll';
     }
-    return 'page';
+    return 'scroll';
   });
 
-  // Scroll container — doubles as width source and virtual scroll anchor
+  // null = not yet measured; prevents the 700px flash on mobile before ResizeObserver fires
   const containerRef = useRef<HTMLDivElement>(null);
-  const [pageWidth, setPageWidth] = useState(700);
+  const [pageWidth, setPageWidth] = useState<number | null>(null);
+
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const update = () => setPageWidth(Math.min(el.clientWidth - 32, 800));
+    const update = () => setPageWidth(Math.min(el.clientWidth - 24, 800));
     update();
     const ro = new ResizeObserver(update);
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
 
-  // Virtual scrolling for scroll mode — only renders ~5 pages at a time regardless of total
+  // Virtual scrolling for scroll mode — only ~5 pages in DOM at any time
   const virtualizer = useVirtualizer({
     count: numPages,
     getScrollElement: () => containerRef.current,
-    // Estimate A4 height + 24px gap — virtualizer self-corrects after measuring real sizes
-    estimateSize: () => Math.round(pageWidth * 1.414) + 24,
-    overscan: 2, // render 2 extra pages above/below viewport as buffer
+    estimateSize: () => Math.round((pageWidth ?? 400) * 1.414) + 16,
+    overscan: 2,
   });
 
-  // Touch swipe tracking
   const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
 
   const { data: session, isLoading } = useQuery({
     queryKey: ['ebook-session', id],
@@ -75,7 +75,6 @@ export default function EbookReaderPage() {
     [numPages],
   );
 
-  // Arrow key navigation in page mode
   useEffect(() => {
     if (mode !== 'page') return;
     const handler = (e: KeyboardEvent) => {
@@ -91,13 +90,16 @@ export default function EbookReaderPage() {
     localStorage.setItem('ebook-read-mode', m);
   }
 
+  // Only fire swipe if horizontal movement is dominant (don't block vertical scroll)
   function onTouchStart(e: React.TouchEvent) {
     touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
   }
   function onTouchEnd(e: React.TouchEvent) {
-    const diff = touchStartX.current - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 50) {
-      if (diff > 0) nextPage();
+    const dx = touchStartX.current - e.changedTouches[0].clientX;
+    const dy = touchStartY.current - e.changedTouches[0].clientY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+      if (dx > 0) nextPage();
       else prevPage();
     }
   }
@@ -108,22 +110,12 @@ export default function EbookReaderPage() {
   const total = numPages || session.totalPages;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-56px)]">
+    // 100dvh = dynamic viewport height — shrinks when mobile browser chrome (address bar) is visible
+    <div className="flex flex-col h-[calc(100dvh-56px)]">
       {/* Toolbar */}
-      <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-2 bg-[var(--background)]">
+      <div className="flex items-center gap-2 border-b border-[var(--border)] px-3 py-2 bg-[var(--background)]">
         {/* Mode toggle */}
         <div className="flex rounded-md border border-[var(--border)] overflow-hidden text-xs shrink-0">
-          <button
-            type="button"
-            onClick={() => switchMode('page')}
-            className={`px-3 py-1.5 font-medium transition-colors ${
-              mode === 'page'
-                ? 'bg-violet-600 text-white'
-                : 'text-[var(--muted-foreground)] hover:bg-[var(--muted)]'
-            }`}
-          >
-            ↔ Page
-          </button>
           <button
             type="button"
             onClick={() => switchMode('scroll')}
@@ -135,36 +127,41 @@ export default function EbookReaderPage() {
           >
             ↕ Scroll
           </button>
+          <button
+            type="button"
+            onClick={() => switchMode('page')}
+            className={`px-3 py-1.5 font-medium transition-colors ${
+              mode === 'page'
+                ? 'bg-violet-600 text-white'
+                : 'text-[var(--muted-foreground)] hover:bg-[var(--muted)]'
+            }`}
+          >
+            ↔ Page
+          </button>
         </div>
 
-        {/* Page navigation (page mode) */}
-        {mode === 'page' && (
-          <div className="flex items-center gap-2 ml-auto">
+        {mode === 'page' ? (
+          <div className="flex items-center gap-1 ml-auto">
             <button
               onClick={prevPage}
               disabled={currentPage <= 1}
-              className="w-8 h-8 flex items-center justify-center rounded text-lg text-[var(--foreground)] disabled:opacity-30 hover:bg-[var(--muted)] transition-colors"
+              className="w-9 h-9 flex items-center justify-center rounded-md text-xl disabled:opacity-30 hover:bg-[var(--muted)] active:bg-[var(--muted)] transition-colors touch-manipulation"
             >
               ‹
             </button>
-            <span className="text-sm tabular-nums text-[var(--muted-foreground)] min-w-[80px] text-center">
+            <span className="text-xs tabular-nums text-[var(--muted-foreground)] min-w-[60px] text-center">
               {currentPage} / {total}
             </span>
             <button
               onClick={nextPage}
               disabled={currentPage >= total}
-              className="w-8 h-8 flex items-center justify-center rounded text-lg text-[var(--foreground)] disabled:opacity-30 hover:bg-[var(--muted)] transition-colors"
+              className="w-9 h-9 flex items-center justify-center rounded-md text-xl disabled:opacity-30 hover:bg-[var(--muted)] active:bg-[var(--muted)] transition-colors touch-manipulation"
             >
               ›
             </button>
           </div>
-        )}
-
-        {/* Page count label (scroll mode) */}
-        {mode === 'scroll' && (
-          <span className="ml-auto text-sm text-[var(--muted-foreground)]">
-            {total} pages
-          </span>
+        ) : (
+          <span className="ml-auto text-xs text-[var(--muted-foreground)]">{total} pages</span>
         )}
       </div>
 
@@ -176,68 +173,52 @@ export default function EbookReaderPage() {
         onTouchStart={mode === 'page' ? onTouchStart : undefined}
         onTouchEnd={mode === 'page' ? onTouchEnd : undefined}
       >
-        <Document file={session.pdfUrl} onLoadSuccess={onDocumentLoad}>
-          {mode === 'page' ? (
-            // Page mode: single page, key forces fresh canvas → no black-page bug
-            <div className="flex items-center justify-center min-h-full py-6 px-4">
-              <Page
-                key={currentPage}
-                pageNumber={currentPage}
-                renderTextLayer={false}
-                renderAnnotationLayer={false}
-                className="shadow-xl rounded-sm overflow-hidden"
-                width={pageWidth}
-              />
-            </div>
-          ) : (
-            // Scroll mode: virtual list — only ~5 pages in DOM regardless of total page count
-            // Safe for 1000+ page PDFs
-            <div
-              style={{ height: `${virtualizer.getTotalSize()}px`, position: 'relative' }}
-            >
-              {virtualizer.getVirtualItems().map((item) => (
-                <div
-                  key={item.key}
-                  data-index={item.index}
-                  ref={virtualizer.measureElement}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    transform: `translateY(${item.start}px)`,
-                  }}
-                  className="flex justify-center py-3 px-4"
-                >
-                  <Page
-                    pageNumber={item.index + 1}
-                    renderTextLayer={false}
-                    renderAnnotationLayer={false}
-                    className="shadow-xl rounded-sm overflow-hidden"
-                    width={pageWidth}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </Document>
+        {/* Don't render until container is measured — prevents the overflow flash on mobile */}
+        {pageWidth && (
+          <Document file={session.pdfUrl} onLoadSuccess={onDocumentLoad}>
+            {mode === 'page' ? (
+              // key={currentPage} forces a fresh canvas on page change — fixes black-page bug
+              <div className="flex items-center justify-center min-h-full py-4 px-3">
+                <Page
+                  key={currentPage}
+                  pageNumber={currentPage}
+                  renderTextLayer={false}
+                  renderAnnotationLayer={false}
+                  className="shadow-lg rounded-sm overflow-hidden max-w-full"
+                  width={pageWidth}
+                />
+              </div>
+            ) : (
+              // Virtual list — only ~5 pages in DOM, safe for 1000+ pages
+              <div style={{ height: `${virtualizer.getTotalSize()}px`, position: 'relative' }}>
+                {virtualizer.getVirtualItems().map((item) => (
+                  <div
+                    key={item.key}
+                    data-index={item.index}
+                    ref={virtualizer.measureElement}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      transform: `translateY(${item.start}px)`,
+                    }}
+                    className="flex justify-center py-2 px-3"
+                  >
+                    <Page
+                      pageNumber={item.index + 1}
+                      renderTextLayer={false}
+                      renderAnnotationLayer={false}
+                      className="shadow-lg rounded-sm overflow-hidden max-w-full"
+                      width={pageWidth}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </Document>
+        )}
       </div>
-
-      {/* Invisible tap zones for page mode on mobile */}
-      {mode === 'page' && numPages > 0 && (
-        <div className="absolute inset-0 top-[calc(56px+41px)] pointer-events-none flex">
-          <button
-            className="flex-1 h-full pointer-events-auto opacity-0"
-            onClick={prevPage}
-            aria-label="Previous page"
-          />
-          <button
-            className="flex-1 h-full pointer-events-auto opacity-0"
-            onClick={nextPage}
-            aria-label="Next page"
-          />
-        </div>
-      )}
     </div>
   );
 }
