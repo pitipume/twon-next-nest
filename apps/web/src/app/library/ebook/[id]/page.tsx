@@ -11,6 +11,24 @@ import api from '@/lib/api';
 import type { EbookSession } from '@/types/product';
 import { PageSpinner } from '@/components/ui/spinner';
 
+function DocLoader() {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 py-20 text-[var(--muted-foreground)]">
+      <div className="w-8 h-8 rounded-full border-2 border-violet-600 border-t-transparent animate-spin" />
+      <span className="text-sm">Loading ebook…</span>
+    </div>
+  );
+}
+
+function PageSkeleton({ width }: { width: number }) {
+  return (
+    <div
+      style={{ width, height: Math.round(width * 1.414) }}
+      className="rounded-sm bg-zinc-200 dark:bg-zinc-700 animate-pulse"
+    />
+  );
+}
+
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 type ReadMode = 'page' | 'scroll';
@@ -26,10 +44,26 @@ export default function EbookReaderPage() {
     return 'scroll';
   });
 
-  // null = not yet measured; prevents the 700px flash on mobile before ResizeObserver fires
   const containerRef = useRef<HTMLDivElement>(null);
-  const [pageWidth, setPageWidth] = useState<number | null>(null);
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
 
+  // Use window.innerWidth as initial estimate — the ResizeObserver will correct it once the
+  // container mounts. Can't start as null because the useEffect runs before the container exists
+  // (hooks run unconditionally even while the component shows <PageSpinner />).
+  const [pageWidth, setPageWidth] = useState(() =>
+    typeof window !== 'undefined' ? Math.min(window.innerWidth - 24, 800) : 400,
+  );
+
+  const { data: session, isLoading } = useQuery({
+    queryKey: ['ebook-session', id],
+    queryFn: async () => {
+      const res = await api.get(`/library/ebooks/${id}/session`);
+      return res.data.data as EbookSession;
+    },
+  });
+
+  // session in deps so this re-runs once the early return lifts and containerRef is in the DOM
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -38,25 +72,14 @@ export default function EbookReaderPage() {
     const ro = new ResizeObserver(update);
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [session]);
 
   // Virtual scrolling for scroll mode — only ~5 pages in DOM at any time
   const virtualizer = useVirtualizer({
     count: numPages,
     getScrollElement: () => containerRef.current,
-    estimateSize: () => Math.round((pageWidth ?? 400) * 1.414) + 16,
+    estimateSize: () => Math.round(pageWidth * 1.414) + 16,
     overscan: 2,
-  });
-
-  const touchStartX = useRef(0);
-  const touchStartY = useRef(0);
-
-  const { data: session, isLoading } = useQuery({
-    queryKey: ['ebook-session', id],
-    queryFn: async () => {
-      const res = await api.get(`/library/ebooks/${id}/session`);
-      return res.data.data as EbookSession;
-    },
   });
 
   const onDocumentLoad = useCallback(
@@ -173,9 +196,11 @@ export default function EbookReaderPage() {
         onTouchStart={mode === 'page' ? onTouchStart : undefined}
         onTouchEnd={mode === 'page' ? onTouchEnd : undefined}
       >
-        {/* Don't render until container is measured — prevents the overflow flash on mobile */}
-        {pageWidth && (
-          <Document file={session.pdfUrl} onLoadSuccess={onDocumentLoad}>
+        <Document
+            file={session.pdfUrl}
+            onLoadSuccess={onDocumentLoad}
+            loading={<DocLoader />}
+          >
             {mode === 'page' ? (
               // key={currentPage} forces a fresh canvas on page change — fixes black-page bug
               <div className="flex items-center justify-center min-h-full py-4 px-3">
@@ -186,6 +211,7 @@ export default function EbookReaderPage() {
                   renderAnnotationLayer={false}
                   className="shadow-lg rounded-sm overflow-hidden max-w-full"
                   width={pageWidth}
+                  loading={<PageSkeleton width={pageWidth} />}
                 />
               </div>
             ) : (
@@ -211,13 +237,13 @@ export default function EbookReaderPage() {
                       renderAnnotationLayer={false}
                       className="shadow-lg rounded-sm overflow-hidden max-w-full"
                       width={pageWidth}
+                      loading={<PageSkeleton width={pageWidth} />}
                     />
                   </div>
                 ))}
               </div>
             )}
           </Document>
-        )}
       </div>
     </div>
   );
