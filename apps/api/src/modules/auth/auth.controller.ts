@@ -16,10 +16,12 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 
 const REFRESH_TOKEN_COOKIE = 'refresh_token';
+const isProd = process.env.NODE_ENV === 'production';
 const COOKIE_OPTIONS = {
   httpOnly: true,        // not accessible via JS — XSS protection
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
+  secure: isProd,
+  // 'none' required for cross-site cookie (vercel → render); 'lax' for localhost
+  sameSite: (isProd ? 'none' : 'lax') as 'none' | 'lax',
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
 };
 
@@ -96,7 +98,7 @@ export class AuthController {
 
     const result = await this.commandBus.execute(new LogoutCommand(userId, token));
 
-    res.clearCookie(REFRESH_TOKEN_COOKIE);
+    res.clearCookie(REFRESH_TOKEN_COOKIE, COOKIE_OPTIONS);
     return result;
   }
 
