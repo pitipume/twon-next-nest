@@ -89,7 +89,8 @@ export default function HomePage() {
       if (filter !== 'all') params.set('type', filter);
       if (debouncedSearch) params.set('search', debouncedSearch);
       const res = await api.get(`/catalog?${params}`);
-      return res.data.data as Product[];
+      // res.data.data = { items: ProductListItem[], total: number }
+      return res.data.data.items as Product[];
     },
   });
 
