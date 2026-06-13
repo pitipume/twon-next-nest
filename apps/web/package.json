@@ -12,6 +12,7 @@
     "@gsap/react": "^2.1.2",
     "@hookform/resolvers": "^3",
     "@tanstack/react-query": "^5",
+    "@tanstack/react-virtual": "^3.14.2",
     "axios": "^1",
     "clsx": "^2",
     "framer-motion": "^12",
