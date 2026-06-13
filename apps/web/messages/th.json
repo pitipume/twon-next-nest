@@ -11,10 +11,17 @@
   "home": {
     "title": "ค้นพบหนังสือและไพ่ทาโรต์",
     "subtitle": "อ่าน Ebook ในเบราว์เซอร์ สับไพ่ทาโรต์ได้เลย",
+    "searchPlaceholder": "ค้นหาหนังสือและไพ่ทาโรต์...",
+    "yourLibrary": "คลังของคุณ",
+    "seeAll": "ดูทั้งหมด →",
+    "browse": "เลือกซื้อ",
     "filterAll": "ทั้งหมด",
     "filterEbook": "Ebook",
     "filterTarot": "ไพ่ทาโรต์",
-    "empty": "ยังไม่มีสินค้า"
+    "empty": "ยังไม่มีสินค้า",
+    "noResults": "ไม่พบผลลัพธ์สำหรับ \"{q}\"",
+    "readNow": "อ่าน →",
+    "playNow": "เล่น →"
   },
   "product": {
     "ebook": "Ebook",

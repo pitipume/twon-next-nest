@@ -6,9 +6,9 @@ import { CatalogService } from '../services/catalog.service';
 export class CatalogManager {
   constructor(private readonly service: CatalogService) {}
 
-  async listProducts(type?: string, page = 1, limit = 20) {
+  async listProducts(type?: string, page = 1, limit = 20, search?: string) {
     const productType = type ? (type.toUpperCase() as ProductType) : undefined;
-    return this.service.getPublishedProducts(productType, { page, limit });
+    return this.service.getPublishedProducts(productType, { page, limit }, search);
   }
 
   async getEbookDetail(productId: string) {

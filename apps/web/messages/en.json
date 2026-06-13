@@ -11,10 +11,17 @@
   "home": {
     "title": "Discover books & tarot",
     "subtitle": "Read ebooks in your browser. Shuffle tarot decks in your hands.",
+    "searchPlaceholder": "Search books & tarot...",
+    "yourLibrary": "Your Library",
+    "seeAll": "See all →",
+    "browse": "Browse",
     "filterAll": "All",
     "filterEbook": "Ebooks",
     "filterTarot": "Tarot Decks",
-    "empty": "No products yet"
+    "empty": "No products yet",
+    "noResults": "No results for \"{q}\"",
+    "readNow": "Read →",
+    "playNow": "Play →"
   },
   "product": {
     "ebook": "Ebook",

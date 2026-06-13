@@ -36,21 +36,27 @@ export class CatalogRepository {
   async findPublishedProducts(
     type?: ProductType,
     pagination?: PaginationParams,
+    search?: string,
   ): Promise<{ items: ProductListItem[]; total: number }> {
     const page = pagination?.page ?? 1;
     const limit = pagination?.limit ?? 20;
     const skip = (page - 1) * limit;
 
+    const where = {
+      isPublished: true,
+      isDeleted: false,
+      ...(type && { productType: type }),
+      ...(search && { title: { contains: search, mode: 'insensitive' as const } }),
+    };
+
     const [products, total] = await this.prisma.$transaction([
       this.prisma.product.findMany({
-        where: { isPublished: true, isDeleted: false, ...(type && { productType: type }) },
+        where,
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
       }),
-      this.prisma.product.count({
-        where: { isPublished: true, isDeleted: false, ...(type && { productType: type }) },
-      }),
+      this.prisma.product.count({ where }),
     ]);
 
     // Enrich with MongoDB content data

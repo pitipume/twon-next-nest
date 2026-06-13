@@ -6,8 +6,8 @@ import { CatalogRepository, PaginationParams } from '../repositories/catalog.rep
 export class CatalogService {
   constructor(private readonly repository: CatalogRepository) {}
 
-  async getPublishedProducts(type?: ProductType, pagination?: PaginationParams) {
-    return this.repository.findPublishedProducts(type, pagination);
+  async getPublishedProducts(type?: ProductType, pagination?: PaginationParams, search?: string) {
+    return this.repository.findPublishedProducts(type, pagination, search);
   }
 
   async getEbookDetail(productId: string) {

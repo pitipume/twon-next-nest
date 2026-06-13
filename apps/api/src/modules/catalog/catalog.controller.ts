@@ -15,11 +15,12 @@ export class CatalogController {
     @Query('type') type?: string,
     @Query('page') page = 1,
     @Query('limit') limit = 20,
+    @Query('search') search?: string,
   ) {
     if (type && !VALID_TYPES.includes(type)) {
       throw new BadRequestException(`type must be one of: ${VALID_TYPES.join(', ')}`);
     }
-    return this.queryBus.execute(new GetProductsQuery(type, Number(page), Number(limit)));
+    return this.queryBus.execute(new GetProductsQuery(type, Number(page), Number(limit), search?.trim() || undefined));
   }
 
   // GET /api/catalog/ebooks/:id
