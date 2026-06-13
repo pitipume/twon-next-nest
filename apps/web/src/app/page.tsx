@@ -98,6 +98,9 @@ export default function HomePage() {
     (item) => !search || item.product.title.toLowerCase().includes(search.toLowerCase()),
   );
 
+  // O(1) ownership lookup for the catalog grid
+  const ownedProductIds = new Set(libraryItems?.map((item) => item.productId) ?? []);
+
   const filters: { key: Filter; label: string }[] = [
     { key: 'all', label: t('filterAll') },
     { key: 'ebook', label: t('filterEbook') },
@@ -170,7 +173,7 @@ export default function HomePage() {
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {catalogData.map((p) => (
-              <ProductCard key={p.id} product={p} />
+              <ProductCard key={p.id} product={p} isOwned={ownedProductIds.has(p.id)} />
             ))}
           </div>
         )}

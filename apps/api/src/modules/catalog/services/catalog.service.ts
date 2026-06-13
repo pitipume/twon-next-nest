@@ -36,7 +36,20 @@ export class CatalogService {
     const ebook = await this.repository.findEbookByProductId(productId);
     if (!ebook) return null;
 
-    return { product, ebook };
+    return {
+      id: product.id,
+      mongoRefId: product.mongoRefId,
+      productType: product.productType,
+      title: product.title,
+      priceTHB: Number(product.priceTHB),
+      coverImageUrl: await this.signCoverUrl(ebook.coverImageUrl ?? ''),
+      author: ebook.author,
+      description: ebook.description,
+      language: ebook.language,
+      categories: ebook.categories,
+      totalPages: ebook.totalPages,
+      previewPages: ebook.previewPages,
+    };
   }
 
   async getProductMeta(productId: string) {
@@ -50,8 +63,15 @@ export class CatalogService {
     const deck = await this.repository.findTarotDeckByProductId(productId);
     if (!deck) return null;
 
-    // Return deck with cards but mask fileKeys — never expose storage keys to client
-    const safeCards = deck.cards.map(({ imageKey: _, ...card }) => card);
-    return { product, deck: { ...deck.toObject(), cards: safeCards } };
+    return {
+      id: product.id,
+      mongoRefId: product.mongoRefId,
+      productType: product.productType,
+      title: product.title,
+      priceTHB: Number(product.priceTHB),
+      coverImageUrl: await this.signCoverUrl(deck.coverImageUrl ?? ''),
+      description: deck.description,
+      cardCount: deck.cardCount,
+    };
   }
 }
