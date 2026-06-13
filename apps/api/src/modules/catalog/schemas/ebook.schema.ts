@@ -5,8 +5,8 @@ export type EbookDocument = HydratedDocument<Ebook>;
 
 @Schema({ collection: 'ebooks', timestamps: true })
 export class Ebook {
-  @Prop({ required: true, unique: true })
-  postgresProductId: string; // FK → products.id in PostgreSQL
+  @Prop({ unique: true, sparse: true })
+  postgresProductId?: string; // FK → products.id in PostgreSQL (set after Prisma product created)
 
   @Prop({ required: true })
   title: string;
@@ -17,8 +17,8 @@ export class Ebook {
   @Prop({ required: true })
   description: string;
 
-  @Prop({ required: true })
-  coverImageUrl: string;
+  @Prop({ default: '' })
+  coverImageUrl: string; // empty if no cover uploaded
 
   @Prop({ required: true })
   fileKey: string; // S3/R2 key — NOT a public URL

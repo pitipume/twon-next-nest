@@ -33,8 +33,8 @@ export class TarotCard {
 
 @Schema({ collection: 'tarot_decks', timestamps: true })
 export class TarotDeck {
-  @Prop({ required: true, unique: true })
-  postgresProductId: string; // FK → products.id in PostgreSQL
+  @Prop({ unique: true, sparse: true })
+  postgresProductId?: string; // FK → products.id in PostgreSQL (set after Prisma product created)
 
   @Prop({ required: true })
   name: string;
@@ -42,11 +42,11 @@ export class TarotDeck {
   @Prop({ required: true })
   description: string;
 
-  @Prop({ required: true })
-  coverImageUrl: string;
+  @Prop({ default: '' })
+  coverImageUrl: string; // empty if no cover uploaded
 
-  @Prop({ required: true })
-  backImageKey: string; // card back design — R2/S3 key
+  @Prop({ default: '' })
+  backImageKey: string; // card back design — R2/S3 key, empty if not provided
 
   @Prop({ required: true, default: 78 })
   cardCount: number;
