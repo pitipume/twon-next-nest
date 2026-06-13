@@ -37,5 +37,4 @@ COPY apps/api/prisma/schema.prisma ./apps/api/prisma/schema.prisma
 
 EXPOSE 3000
 
-# --datasource-url bypasses prisma.config.ts (no ts-node needed in runtime)
-CMD ["sh", "-c", "cd apps/api && npx prisma db push --schema=prisma/schema.prisma --datasource-url=${DATABASE_URL} --accept-data-loss && node dist/main"]
+CMD ["sh", "-c", "cd apps/api && npx prisma db push --schema=prisma/schema.prisma --url=${DATABASE_URL} --accept-data-loss && node dist/main"]
