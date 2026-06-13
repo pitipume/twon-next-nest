@@ -90,7 +90,7 @@ export default function AdminProductsPage() {
                 </div>
                 <p className="mt-1 text-sm font-medium truncate">{p.title}</p>
                 <p className="text-xs text-[var(--muted-foreground)]">
-                  ฿{Number(p.priceTHB).toLocaleString()} · {new Date(p.createdAt).toLocaleDateString('th-TH')}
+                  ฿{Number(p.priceTHB).toLocaleString()} · {new Date(p.createdAt).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' })}
                 </p>
               </div>
 
