@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { ArrowLeft } from 'lucide-react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
@@ -34,6 +35,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/b
 type ReadMode = 'page' | 'scroll';
 
 export default function EbookReaderPage() {
+  const router = useRouter();
   const { id } = useParams<{ id: string }>();
   const [numPages, setNumPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -136,6 +138,15 @@ export default function EbookReaderPage() {
     <div className="flex flex-col h-[calc(100svh-56px)]">
       {/* Toolbar */}
       <div className="flex items-center gap-2 border-b border-[var(--border)] px-3 py-2 bg-[var(--background)]">
+        {/* Back button */}
+        <button
+          onClick={() => router.back()}
+          className="w-9 h-9 flex items-center justify-center rounded-md text-[var(--foreground)] hover:bg-[var(--muted)] active:bg-[var(--muted)] transition-colors touch-manipulation shrink-0"
+          aria-label="Back"
+        >
+          <ArrowLeft size={18} />
+        </button>
+
         {/* Mode toggle */}
         <div className="flex rounded-md border border-[var(--border)] overflow-hidden text-xs shrink-0">
           <button
