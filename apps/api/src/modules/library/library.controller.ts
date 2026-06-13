@@ -19,7 +19,7 @@ export class LibraryController {
   // GET /api/library — user's owned items
   @Get()
   getLibrary(@CurrentUser() user: { id: string; role: string }) {
-    return this.queryBus.execute(new GetLibraryQuery(user.id));
+    return this.queryBus.execute(new GetLibraryQuery(user.id, user.role));
   }
 
   // GET /api/library/ebooks/:productId/session — signed URL + reading position

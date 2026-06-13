@@ -43,13 +43,13 @@ export class CatalogRepository {
 
     const [products, total] = await this.prisma.$transaction([
       this.prisma.product.findMany({
-        where: { isPublished: true, ...(type && { productType: type }) },
+        where: { isPublished: true, isDeleted: false, ...(type && { productType: type }) },
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
       }),
       this.prisma.product.count({
-        where: { isPublished: true, ...(type && { productType: type }) },
+        where: { isPublished: true, isDeleted: false, ...(type && { productType: type }) },
       }),
     ]);
 
@@ -140,6 +140,25 @@ export class CatalogRepository {
 
   async findProductByMongoRefId(mongoRefId: string) {
     return this.prisma.product.findUnique({ where: { mongoRefId } });
+  }
+
+  async findProductIdsByCreator(userId: string): Promise<string[]> {
+    const [ebooks, decks] = await Promise.all([
+      this.ebookModel.find({ createdBy: userId, postgresProductId: { $ne: null } }, { postgresProductId: 1 }).lean().exec(),
+      this.tarotModel.find({ createdBy: userId, postgresProductId: { $ne: null } }, { postgresProductId: 1 }).lean().exec(),
+    ]);
+    return [
+      ...ebooks.map((e) => e.postgresProductId as string),
+      ...decks.map((d) => d.postgresProductId as string),
+    ];
+  }
+
+  async deleteEbookByProductId(postgresProductId: string): Promise<void> {
+    await this.ebookModel.findOneAndDelete({ postgresProductId }).exec();
+  }
+
+  async deleteTarotDeckByProductId(postgresProductId: string): Promise<void> {
+    await this.tarotModel.findOneAndDelete({ postgresProductId }).exec();
   }
 
   // ─── Private ─────────────────────────────────────────────────────────────

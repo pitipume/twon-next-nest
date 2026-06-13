@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
 import { StorageService } from '../../../infrastructure/storage/storage.service';
 import { CatalogRepository } from '../../catalog/repositories/catalog.repository';
@@ -192,6 +192,7 @@ export class AdminService {
 
   async getAllProducts() {
     return this.prisma.product.findMany({
+      where: { isDeleted: false },
       orderBy: { createdAt: 'desc' },
       select: { id: true, title: true, productType: true, priceTHB: true, isPublished: true, createdAt: true },
     });
@@ -225,6 +226,19 @@ export class AdminService {
     });
 
     return { qrImageKey: key };
+  }
+
+  // ─── Delete (draft only) ─────────────────────────────────────────────────
+
+  async deleteProduct(productId: string) {
+    const product = await this.prisma.product.findUnique({ where: { id: productId } });
+    if (!product) throw new NotFoundException('Product not found.');
+    if (product.isPublished) throw new BadRequestException('Unpublish the product before deleting it.');
+
+    await this.prisma.product.update({
+      where: { id: productId },
+      data: { isDeleted: true },
+    });
   }
 
   // ─── Publish / Unpublish ──────────────────────────────────────────────────

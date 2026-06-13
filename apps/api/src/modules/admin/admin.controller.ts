@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -99,6 +100,12 @@ export class AdminController {
     });
 
     return { code: 'A001', status: 'success', data: result };
+  }
+
+  // DELETE /api/admin/products/:id — draft only
+  @Delete('products/:id')
+  deleteProduct(@Param('id') id: string) {
+    return this.service.deleteProduct(id);
   }
 
   // PATCH /api/admin/products/:id/publish

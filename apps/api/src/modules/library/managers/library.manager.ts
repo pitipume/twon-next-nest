@@ -5,12 +5,32 @@ import { LibraryService } from '../services/library.service';
 export class LibraryManager {
   constructor(private readonly service: LibraryService) {}
 
-  async getLibrary(userId: string) {
+  async getLibrary(userId: string, role: string) {
+    if (role === 'ADMIN') {
+      const products = await this.service.getAllProductsForAdmin();
+      return products.map((p) => ({
+        id: p.id,
+        productId: p.id,
+        product: { ...p, priceTHB: Number(p.priceTHB) },
+        grantedAt: p.createdAt,
+      }));
+    }
+
+    if (role === 'MERCHANT') {
+      const products = await this.service.getCreatedProducts(userId);
+      return products.map((p) => ({
+        id: p.id,
+        productId: p.id,
+        product: { ...p, priceTHB: Number(p.priceTHB) },
+        grantedAt: p.createdAt,
+      }));
+    }
+
     const items = await this.service.getUserLibrary(userId);
     return items.map((item) => ({
+      id: item.id,
       productId: item.productId,
-      productType: item.product.productType,
-      title: item.product.title,
+      product: { ...item.product, priceTHB: Number(item.product.priceTHB) },
       grantedAt: item.grantedAt,
     }));
   }

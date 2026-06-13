@@ -8,7 +8,7 @@ export class GetLibraryHandler implements IQueryHandler<GetLibraryQuery> {
   constructor(private readonly manager: LibraryManager) {}
 
   async execute(query: GetLibraryQuery) {
-    const items = await this.manager.getLibrary(query.userId);
+    const items = await this.manager.getLibrary(query.userId, query.role);
     return ApiResponse.success(items);
   }
 }

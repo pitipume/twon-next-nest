@@ -23,6 +23,16 @@ export class LibraryService {
     return this.repository.userOwnsProduct(userId, productId);
   }
 
+  async getAllProductsForAdmin() {
+    return this.repository.getAllProducts();
+  }
+
+  async getCreatedProducts(userId: string) {
+    const productIds = await this.catalogRepository.findProductIdsByCreator(userId);
+    if (!productIds.length) return [];
+    return this.repository.getProductsByIds(productIds);
+  }
+
   async userCreatedProduct(userId: string, productId: string): Promise<boolean> {
     const ebook = await this.catalogRepository.findEbookByProductId(productId);
     if (ebook) return ebook.createdBy === userId;

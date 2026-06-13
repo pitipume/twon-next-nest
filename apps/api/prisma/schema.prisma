@@ -78,6 +78,7 @@ model Product {
   title        String
   priceTHB     Decimal     @db.Decimal(10, 2)
   isPublished  Boolean     @default(false)
+  isDeleted    Boolean     @default(false)
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 

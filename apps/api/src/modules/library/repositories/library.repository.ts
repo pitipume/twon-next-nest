@@ -29,6 +29,17 @@ export class LibraryRepository {
     });
   }
 
+  async getAllProducts() {
+    return this.prisma.product.findMany({ where: { isDeleted: false }, orderBy: { createdAt: 'desc' } });
+  }
+
+  async getProductsByIds(productIds: string[]) {
+    return this.prisma.product.findMany({
+      where: { id: { in: productIds }, isDeleted: false },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async grantAccess(userId: string, productId: string, orderId: string) {
     return this.prisma.libraryItem.upsert({
       where: { userId_productId: { userId, productId } },

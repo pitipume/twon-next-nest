@@ -37,6 +37,23 @@ export default function AdminProductsPage() {
     onError: () => toast.error('Failed to update.'),
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => api.delete(`/admin/products/${id}`),
+    onSuccess: () => {
+      toast.success('Product deleted.');
+      qc.invalidateQueries({ queryKey: ['admin-products'] });
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message ?? 'Failed to delete.';
+      toast.error(msg);
+    },
+  });
+
+  function confirmDelete(id: string, title: string) {
+    if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
+    deleteMutation.mutate(id);
+  }
+
   if (isLoading) return <PageSpinner />;
 
   return (
@@ -77,14 +94,27 @@ export default function AdminProductsPage() {
                 </p>
               </div>
 
-              <Button
-                size="sm"
-                variant={p.isPublished ? 'outline' : 'primary'}
-                loading={publishMutation.isPending}
-                onClick={() => publishMutation.mutate({ id: p.id, publish: !p.isPublished })}
-              >
-                {p.isPublished ? 'Unpublish' : 'Publish'}
-              </Button>
+              <div className="flex items-center gap-2 shrink-0">
+                {!p.isPublished && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    loading={deleteMutation.isPending}
+                    onClick={() => confirmDelete(p.id, p.title)}
+                    className="text-red-500 border-red-300 hover:bg-red-50 dark:hover:bg-red-950/20"
+                  >
+                    Delete
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  variant={p.isPublished ? 'outline' : 'primary'}
+                  loading={publishMutation.isPending}
+                  onClick={() => publishMutation.mutate({ id: p.id, publish: !p.isPublished })}
+                >
+                  {p.isPublished ? 'Unpublish' : 'Publish'}
+                </Button>
+              </div>
             </div>
           ))}
         </div>
