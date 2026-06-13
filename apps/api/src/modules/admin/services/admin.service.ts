@@ -64,7 +64,7 @@ export class AdminService {
         .toBuffer();
       const coverKey = this.storage.buildKey.ebookCover(mongoId);
       await this.storage.upload(coverKey, webpBuffer, 'image/webp');
-      coverImageUrl = await this.storage.getSignedReadUrl(coverKey, 60 * 60 * 24 * 365);
+      coverImageUrl = coverKey; // store the key — signed URLs are generated fresh at read time
     }
 
     // 4. Update ebook doc with real fileKey + coverImageUrl
@@ -156,7 +156,7 @@ export class AdminService {
       const webp = await sharp(params.coverBuffer).resize(400, 600, { fit: 'cover' }).webp({ quality: 85 }).toBuffer();
       const key = this.storage.buildKey.tarotCover(mongoId);
       await this.storage.upload(key, webp, 'image/webp');
-      coverImageUrl = await this.storage.getSignedReadUrl(key, 60 * 60 * 24 * 365);
+      coverImageUrl = key; // store the key — signed URLs are generated fresh at read time
     }
 
     if (params.backBuffer) {

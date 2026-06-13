@@ -23,10 +23,21 @@ export class LibraryService {
     return this.repository.userOwnsProduct(userId, productId);
   }
 
+  private async signCoverUrl(raw: string): Promise<string> {
+    if (!raw) return '';
+    if (raw.startsWith('http')) return raw; // backward compat: old data stored full URL
+    return this.storage.getSignedReadUrl(raw, 60 * 60 * 24); // 24h for thumbnails
+  }
+
   private async enrichWithCovers<T extends { mongoRefId: string }>(products: T[]): Promise<(T & { coverImageUrl: string })[]> {
     if (!products.length) return products.map((p) => ({ ...p, coverImageUrl: '' }));
     const coverMap = await this.catalogRepository.findCoverImageUrls(products.map((p) => p.mongoRefId));
-    return products.map((p) => ({ ...p, coverImageUrl: coverMap.get(p.mongoRefId) ?? '' }));
+    return Promise.all(
+      products.map(async (p) => ({
+        ...p,
+        coverImageUrl: await this.signCoverUrl(coverMap.get(p.mongoRefId) ?? ''),
+      })),
+    );
   }
 
   async getAllProductsForAdmin() {

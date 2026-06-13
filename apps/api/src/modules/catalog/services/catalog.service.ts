@@ -1,13 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { ProductType } from '@prisma/client';
 import { CatalogRepository, PaginationParams } from '../repositories/catalog.repository';
+import { StorageService } from '../../../infrastructure/storage/storage.service';
+
+const COVER_TTL = 60 * 60 * 24; // 24 hours — thumbnails don't need long TTL
 
 @Injectable()
 export class CatalogService {
-  constructor(private readonly repository: CatalogRepository) {}
+  constructor(
+    private readonly repository: CatalogRepository,
+    private readonly storage: StorageService,
+  ) {}
+
+  private async signCoverUrl(raw: string): Promise<string> {
+    if (!raw) return '';
+    if (raw.startsWith('http')) return raw; // backward compat: old data stored full URL
+    return this.storage.getSignedReadUrl(raw, COVER_TTL);
+  }
 
   async getPublishedProducts(type?: ProductType, pagination?: PaginationParams, search?: string) {
-    return this.repository.findPublishedProducts(type, pagination, search);
+    const result = await this.repository.findPublishedProducts(type, pagination, search);
+    const items = await Promise.all(
+      result.items.map(async (item) => ({
+        ...item,
+        coverImageUrl: await this.signCoverUrl(item.coverImageUrl),
+      })),
+    );
+    return { ...result, items };
   }
 
   async getEbookDetail(productId: string) {

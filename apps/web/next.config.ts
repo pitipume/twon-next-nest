@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '**.cloudflare.com',
       },
+      {
+        // Presigned URLs from Cloudflare R2 S3-compatible endpoint
+        protocol: 'https',
+        hostname: '*.r2.cloudflarestorage.com',
+      },
     ],
   },
   // Turbopack is the default bundler in Next.js 16
