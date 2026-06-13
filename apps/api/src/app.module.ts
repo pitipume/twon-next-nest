@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
 import { MongooseModule } from '@nestjs/mongoose';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { PrismaModule } from './infrastructure/prisma/prisma.module';
 import { RedisModule } from './infrastructure/redis/redis.module';
 import { StorageModule } from './infrastructure/storage/storage.module';
@@ -37,5 +39,7 @@ import { PaymentModule } from './modules/payment/payment.module';
     StoreModule,
     PaymentModule,
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
