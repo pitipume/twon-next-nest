@@ -18,6 +18,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { PaymentManager } from './managers/payment.manager';
 import { SubmitSlipDto } from './dto/submit-slip.dto';
 import { RejectPaymentDto } from './dto/reject-payment.dto';
+import { ApproveBatchDto } from './dto/approve-batch.dto';
 import { ApiResponse } from '../../common/response/api-response';
 
 const ALLOWED_SLIP_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -84,6 +85,24 @@ export class PaymentController {
     const result = await this.manager.rejectPayment(user.id, orderId, dto.reason);
     if (!result.success) return ApiResponse.failure(result.message);
     return ApiResponse.success(null, result.message);
+  }
+
+  // POST /api/payment/orders/approve-batch  [ADMIN only]
+  @Post('orders/approve-batch')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async approveBatch(
+    @CurrentUser() user: { id: string },
+    @Body() dto: ApproveBatchDto,
+  ) {
+    const results = await Promise.all(
+      dto.orderIds.map((id) => this.manager.approvePayment(user.id, id)),
+    );
+    const failed = results.filter((r) => !r.success).length;
+    if (failed > 0) {
+      return ApiResponse.failure(`${failed} order(s) could not be approved.`);
+    }
+    return ApiResponse.success(null, `${dto.orderIds.length} payment(s) approved.`);
   }
 
   // GET /api/payment/orders/pending  [ADMIN only]

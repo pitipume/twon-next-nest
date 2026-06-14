@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BackButton } from '@/components/ui/back-button';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,6 +22,7 @@ export default function PaymentConfigPage() {
   const [qrFile, setQrFile] = useState<File | null>(null);
   const [uploadingQr, setUploadingQr] = useState(false);
   const [loading, setLoading] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -86,11 +87,19 @@ export default function PaymentConfigPage() {
         <h2 className="text-sm font-medium">PromptPay QR image</h2>
         <p className="text-xs text-[var(--muted-foreground)]">Upload the QR code image customers will scan to pay</p>
         <input
+          ref={fileInputRef}
           type="file"
           accept="image/jpeg,image/png,image/webp"
           onChange={(e) => setQrFile(e.target.files?.[0] ?? null)}
-          className="w-full text-sm text-[var(--muted-foreground)]"
+          className="hidden"
         />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="w-full rounded-lg border-2 border-dashed border-[var(--border)] py-4 text-sm text-[var(--muted-foreground)] hover:border-violet-500 hover:text-violet-600 transition-colors active:opacity-70"
+        >
+          {qrFile ? `Selected: ${qrFile.name}` : 'Tap to select QR image (JPG / PNG / WebP)'}
+        </button>
         {qrFile && (
           <Button className="w-full" loading={uploadingQr} onClick={uploadQr}>
             Upload QR image

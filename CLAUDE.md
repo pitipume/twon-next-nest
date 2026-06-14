@@ -219,13 +219,18 @@ When `FEATURE_EMAIL_OTP_ENABLED=true`: OTP is generated, logged to server consol
 - Search by title
 - Product detail page (flat response — cover signed, price as number)
 - Owned products shown in browse with "In Library" badge + direct reader link
+- Free preview — `GET /catalog/:id/preview` returns signed PDF URL + previewPages count (no auth); shown on detail page if `previewPages > 0`; preview reader caps pages with buy CTA at end
 
 ### Admin
 - Upload ebooks and tarot decks via presigned R2 PUT URLs (client uploads directly)
 - PDF thumbnail auto-generated client-side (pdfjs-dist)
 - Publish / unpublish products
 - Delete draft products
-- View all products list (includes unpublished)
+- View all products list (includes unpublished) — shows uploader displayName
+- `uploadedBy` (userId) saved on every Product — foundation for V2 merchant scoping
+- Pending payments — approve individually or select-all + batch approve
+- Batch approve: `POST /payment/orders/approve-batch` with `{ orderIds: string[] }`
+- Payment config (bank name, account number, QR image) — ADMIN only
 
 ### Ebook Reader
 - Scroll mode (virtual scrolling via `@tanstack/react-virtual` — safe for 1000+ pages)
@@ -239,6 +244,7 @@ When `FEATURE_EMAIL_OTP_ENABLED=true`: OTP is generated, logged to server consol
 - User's purchased items displayed on home page (horizontal scroll)
 - Ebook reading session endpoint (returns signed PDF URL + page count)
 - Tarot session endpoint (returns signed card image URLs)
+- Library covers signed correctly (was returning raw R2 keys — fixed)
 
 ---
 
