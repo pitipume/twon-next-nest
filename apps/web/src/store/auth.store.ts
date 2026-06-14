@@ -27,6 +27,9 @@ export const useAuthStore = create<AuthState>()(
       setUser: (user) => set({ user }),
       clear: () => set({ accessToken: null, user: null }),
     }),
-    { name: 'twon-auth' },
+    {
+      name: 'twon-auth',
+      partialize: (state) => ({ user: state.user }), // never persist accessToken — it's in-memory only
+    },
   ),
 );
