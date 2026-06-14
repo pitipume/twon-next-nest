@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, Logger, NotFoundException } from '@nes
 import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
 import { StorageService } from '../../../infrastructure/storage/storage.service';
 import { CatalogRepository } from '../../catalog/repositories/catalog.repository';
-import { OrderStatus, ProductType } from '@prisma/client';
+import { OrderStatus, ProductType, UserRole } from '@prisma/client';
 import AdmZip from 'adm-zip';
 import sharp from 'sharp';
 
