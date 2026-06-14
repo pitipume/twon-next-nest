@@ -126,8 +126,17 @@ export class AdminController {
       bankName: dto.bankName,
       accountName: dto.accountName,
       accountNumber: dto.accountNumber,
+      commissionRate: dto.commissionRate,
     });
     return ApiResponse.success(result);
+  }
+
+  // GET /api/admin/merchant-earnings — per-merchant sales & commission totals  [ADMIN only]
+  @Get('merchant-earnings')
+  @Roles(UserRole.ADMIN)
+  async getMerchantEarnings() {
+    const data = await this.service.getMerchantEarnings();
+    return ApiResponse.success(data);
   }
 
   // POST /api/admin/payment-config/qr — upload PromptPay QR image  [ADMIN only]

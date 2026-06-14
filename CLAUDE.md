@@ -230,7 +230,10 @@ When `FEATURE_EMAIL_OTP_ENABLED=true`: OTP is generated, logged to server consol
 - `uploadedBy` (userId) saved on every Product — foundation for V2 merchant scoping
 - Pending payments — approve individually or select-all + batch approve
 - Batch approve: `POST /payment/orders/approve-batch` with `{ orderIds: string[] }`
-- Payment config (bank name, account number, QR image) — ADMIN only
+- Payment config (bank name, account number, QR image, commission rate %) — ADMIN only
+- Commission snapshots written to `OrderItem` at approval time (`commissionRate`, `commissionAmount`, `netAmount`)
+- Merchant earnings dashboard — `GET /admin/merchant-earnings` aggregates completed sales by uploader; shows gross/commission/net per merchant; admin pays net manually month-end
+- Admin nav is role-filtered: MERCHANT sees upload+products only; ADMIN sees all including earnings
 
 ### Ebook Reader
 - Scroll mode (virtual scrolling via `@tanstack/react-virtual` — safe for 1000+ pages)

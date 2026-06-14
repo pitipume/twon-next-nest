@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, Logger, NotFoundException } from '@nes
 import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
 import { StorageService } from '../../../infrastructure/storage/storage.service';
 import { CatalogRepository } from '../../catalog/repositories/catalog.repository';
-import { ProductType } from '@prisma/client';
+import { OrderStatus, ProductType } from '@prisma/client';
 import AdmZip from 'adm-zip';
 import sharp from 'sharp';
 
@@ -222,12 +222,65 @@ export class AdminService {
     bankName: string;
     accountName: string;
     accountNumber: string;
+    commissionRate?: number;
   }) {
+    const data = params.commissionRate !== undefined
+      ? params
+      : { bankName: params.bankName, accountName: params.accountName, accountNumber: params.accountNumber };
     return this.prisma.paymentConfig.upsert({
       where: { id: 'singleton' },
-      create: { id: 'singleton', ...params },
-      update: params,
+      create: { id: 'singleton', ...data },
+      update: data,
     });
+  }
+
+  async getMerchantEarnings() {
+    const items = await this.prisma.orderItem.findMany({
+      where: {
+        order: { status: OrderStatus.COMPLETED },
+        product: { uploadedBy: { not: null } },
+      },
+      include: {
+        product: {
+          include: {
+            uploader: { select: { id: true, displayName: true, email: true } },
+          },
+        },
+      },
+    });
+
+    const byMerchant = new Map<string, {
+      merchantId: string;
+      displayName: string;
+      email: string;
+      itemCount: number;
+      grossTHB: number;
+      commissionTHB: number;
+      netTHB: number;
+    }>();
+
+    for (const item of items) {
+      const merchantId = item.product.uploadedBy!;
+      if (!byMerchant.has(merchantId)) {
+        byMerchant.set(merchantId, {
+          merchantId,
+          displayName: item.product.uploader!.displayName,
+          email: item.product.uploader!.email,
+          itemCount: 0,
+          grossTHB: 0,
+          commissionTHB: 0,
+          netTHB: 0,
+        });
+      }
+      const m = byMerchant.get(merchantId)!;
+      m.itemCount++;
+      m.grossTHB += Number(item.priceTHB);
+      m.commissionTHB += Number(item.commissionAmount ?? 0);
+      // netAmount is null for orders approved before this feature — treat as 100% net
+      m.netTHB += item.netAmount !== null ? Number(item.netAmount) : Number(item.priceTHB);
+    }
+
+    return [...byMerchant.values()];
   }
 
   async uploadPaymentQr(qrBuffer: Buffer, contentType: string) {

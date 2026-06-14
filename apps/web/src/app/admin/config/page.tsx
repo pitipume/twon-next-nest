@@ -15,6 +15,7 @@ const schema = z.object({
   bankName: z.string().min(1),
   accountName: z.string().min(1),
   accountNumber: z.string().min(1),
+  commissionRatePercent: z.coerce.number().min(0).max(100),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -31,7 +32,15 @@ export default function PaymentConfigPage() {
   useEffect(() => {
     api.get('/admin/payment-config')
       .then(({ data }) => {
-        if (data?.data) reset(data.data);
+        if (data?.data) {
+          const cfg = data.data;
+          reset({
+            bankName: cfg.bankName,
+            accountName: cfg.accountName,
+            accountNumber: cfg.accountNumber,
+            commissionRatePercent: Math.round((cfg.commissionRate ?? 0) * 100),
+          });
+        }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -39,7 +48,11 @@ export default function PaymentConfigPage() {
 
   async function onSubmit(data: FormData) {
     try {
-      await api.put('/admin/payment-config', data);
+      const { commissionRatePercent, ...rest } = data;
+      await api.put('/admin/payment-config', {
+        ...rest,
+        commissionRate: commissionRatePercent / 100,
+      });
       toast.success('Payment config saved!');
     } catch {
       toast.error('Failed to save config.');
@@ -78,6 +91,18 @@ export default function PaymentConfigPage() {
         <Input label="Bank name" placeholder="กสิกรไทย" error={errors.bankName?.message} {...register('bankName')} />
         <Input label="Account name" placeholder="ชื่อบัญชี" error={errors.accountName?.message} {...register('accountName')} />
         <Input label="Account number" placeholder="xxx-x-xxxxx-x" error={errors.accountNumber?.message} {...register('accountNumber')} />
+        <div className="space-y-1">
+          <Input
+            label="Platform commission (%)"
+            type="number"
+            placeholder="0"
+            min={0}
+            max={100}
+            error={errors.commissionRatePercent?.message}
+            {...register('commissionRatePercent')}
+          />
+          <p className="text-xs text-[var(--muted-foreground)]">Deducted from each sale at approval. 0 = no commission.</p>
+        </div>
         <Button type="submit" className="w-full" loading={isSubmitting}>
           Save bank details
         </Button>

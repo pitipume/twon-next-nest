@@ -19,11 +19,12 @@ export default function AdminPage() {
   if (!user) return null;
 
   const links = [
-    { href: '/admin/upload', label: 'Upload content', emoji: '📤', desc: 'Add ebooks or tarot decks' },
-    { href: '/admin/products', label: 'Products', emoji: '📦', desc: 'Publish or unpublish content' },
-    { href: '/admin/orders', label: 'Pending payments', emoji: '🧾', desc: 'Approve or reject payment slips' },
-    { href: '/admin/config', label: 'Payment config', emoji: '🏦', desc: 'Set bank details & QR code' },
-  ];
+    { href: '/admin/upload', label: 'Upload content', emoji: '📤', desc: 'Add ebooks or tarot decks', roles: ['MERCHANT', 'ADMIN'] },
+    { href: '/admin/products', label: 'Products', emoji: '📦', desc: 'Publish or unpublish content', roles: ['MERCHANT', 'ADMIN'] },
+    { href: '/admin/orders', label: 'Pending payments', emoji: '🧾', desc: 'Approve or reject payment slips', roles: ['ADMIN'] },
+    { href: '/admin/config', label: 'Payment config', emoji: '🏦', desc: 'Set bank details & QR code', roles: ['ADMIN'] },
+    { href: '/admin/earnings', label: 'Merchant earnings', emoji: '💰', desc: 'Per-merchant sales & commission totals', roles: ['ADMIN'] },
+  ].filter((l) => l.roles.includes(user.role));
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 space-y-8">

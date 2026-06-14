@@ -44,7 +44,7 @@ export default function AppProviders({ children }: { children: React.ReactNode }
     <QueryClientProvider client={queryClient}>
       <AuthBootstrap />
       {children}
-      <Toaster position="top-right" richColors />
+      <Toaster position="top-right" richColors closeButton />
     </QueryClientProvider>
   );
 }

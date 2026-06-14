@@ -27,9 +27,17 @@ export class PaymentService {
     const order = await this.repository.findOrderWithItems(orderId);
     if (!order) return null;
 
-    await this.repository.approvePayment(orderId, adminId);
+    const rate = await this.repository.getCommissionRate();
 
-    // Grant library access for every product in this order
+    const itemCommissions = order.orderItems.map((item) => {
+      const gross = Number(item.priceTHB);
+      const commissionAmount = Math.round(gross * rate * 100) / 100;
+      const netAmount = Math.round((gross - commissionAmount) * 100) / 100;
+      return { id: item.id, commissionRate: rate, commissionAmount, netAmount };
+    });
+
+    await this.repository.approvePayment(orderId, adminId, itemCommissions);
+
     const productIds = order.orderItems.map((i) => i.productId);
     await this.repository.grantLibraryAccess(order.userId, orderId, productIds);
 

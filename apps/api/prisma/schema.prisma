@@ -113,11 +113,16 @@ model Order {
 }
 
 model OrderItem {
-  id        String   @id @default(uuid())
-  orderId   String
-  productId String
-  priceTHB  Decimal  @db.Decimal(10, 2)
-  createdAt DateTime @default(now())
+  id               String   @id @default(uuid())
+  orderId          String
+  productId        String
+  priceTHB         Decimal  @db.Decimal(10, 2)
+  createdAt        DateTime @default(now())
+
+  // Commission snapshot written at payment approval time
+  commissionRate   Decimal? @db.Decimal(5, 4)  // e.g. 0.1500 = 15%
+  commissionAmount Decimal? @db.Decimal(10, 2)
+  netAmount        Decimal? @db.Decimal(10, 2)  // priceTHB - commissionAmount
 
   order     Order    @relation(fields: [orderId], references: [id])
   product   Product  @relation(fields: [productId], references: [id])
@@ -154,12 +159,13 @@ model Payment {
 // ─── Payment Config (admin-managed bank details shown at checkout) ─────────────
 
 model PaymentConfig {
-  id            String   @id @default("singleton") // only one record ever
-  bankName      String   @default("")
-  accountName   String   @default("")
-  accountNumber String   @default("")
-  qrImageKey    String   @default("") // R2 key for PromptPay QR image
-  updatedAt     DateTime @updatedAt
+  id             String   @id @default("singleton") // only one record ever
+  bankName       String   @default("")
+  accountName    String   @default("")
+  accountNumber  String   @default("")
+  qrImageKey     String   @default("") // R2 key for PromptPay QR image
+  commissionRate Decimal  @default(0) @db.Decimal(5, 4) // 0.0000–1.0000; 0 = no commission
+  updatedAt      DateTime @updatedAt
 
   @@map("payment_config")
 }
