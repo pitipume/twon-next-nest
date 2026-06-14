@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
 export class UploadTarotDeckDto {
@@ -12,7 +12,7 @@ export class UploadTarotDeckDto {
   description?: string;
 
   @IsNumber()
-  @IsPositive()
+  @Min(0)
   @Type(() => Number)
   priceTHB: number;
 
