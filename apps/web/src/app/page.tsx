@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import { Search } from 'lucide-react';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
+import { Features } from '@/config/features';
 import { ProductCard } from '@/components/catalog/product-card';
 import { Badge } from '@/components/ui/badge';
 import { PageSpinner } from '@/components/ui/spinner';
@@ -104,7 +105,7 @@ export default function HomePage() {
   const filters: { key: Filter; label: string }[] = [
     { key: 'all', label: t('filterAll') },
     { key: 'ebook', label: t('filterEbook') },
-    { key: 'tarot_deck', label: t('filterTarot') },
+    ...(Features.etarot ? [{ key: 'tarot_deck' as Filter, label: t('filterTarot') }] : []),
   ];
 
   return (

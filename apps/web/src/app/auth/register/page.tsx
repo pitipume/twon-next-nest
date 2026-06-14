@@ -8,6 +8,8 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
+import { useAuthStore } from '@/store/auth.store';
+import { Features } from '@/config/features';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
@@ -28,6 +30,7 @@ type FormData = z.infer<typeof schema>;
 export default function RegisterPage() {
   const router = useRouter();
   const t = useTranslations('auth.register');
+  const { setAccessToken, setUser } = useAuthStore();
 
   const {
     register,
@@ -41,6 +44,22 @@ export default function RegisterPage() {
         email: data.email,
         displayName: data.displayName,
       });
+
+      if (!Features.emailOtp) {
+        // OTP disabled — auto-verify immediately with fixed code, no verify page shown
+        const res = await api.post('/auth/register/verify', {
+          email: data.email,
+          otp: '000000',
+          password: data.password,
+        });
+        const { accessToken, user } = res.data.data;
+        setAccessToken(accessToken);
+        if (user) setUser(user);
+        toast.success('Welcome to Twon!');
+        router.push('/');
+        return;
+      }
+
       sessionStorage.setItem('reg_password', data.password);
       sessionStorage.setItem('reg_displayName', data.displayName);
       toast.success('OTP sent to your email!');

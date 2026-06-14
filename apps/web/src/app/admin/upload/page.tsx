@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { Upload, FileText, Image, Archive } from 'lucide-react';
+import { Features } from '@/config/features';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -361,7 +362,7 @@ export default function UploadPage() {
       </div>
 
       <div className="flex rounded-lg border border-[var(--border)] overflow-hidden">
-        {(['ebook', 'tarot'] as UploadType[]).map((t) => (
+        {(['ebook', ...(Features.etarot ? ['tarot'] : [])] as UploadType[]).map((t) => (
           <button
             key={t}
             type="button"

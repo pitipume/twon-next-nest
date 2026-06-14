@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { AuthService, TokenPair } from '../services/auth.service';
 import { NotificationService } from '../../notification/services/notification.service';
+import { Features } from '../../../config/features';
 
 interface ManagerResult<T = undefined> {
   success: boolean;
@@ -17,6 +18,8 @@ interface AuthData {
 
 @Injectable()
 export class AuthManager {
+  private readonly logger = new Logger(AuthManager.name);
+
   constructor(
     private readonly service: AuthService,
     private readonly notification: NotificationService,
@@ -33,12 +36,23 @@ export class AuthManager {
       return { success: false, message: 'An account with this email already exists.' };
     }
 
+    if (!Features.emailOtp) {
+      // Email OTP disabled — store fixed OTP so verifyRegister still works normally.
+      // Frontend auto-submits '000000' immediately after initiate (no verify page shown).
+      await Promise.all([
+        this.service.storeOtp(email, '000000'),
+        this.service.storeOtpContext(email, displayName),
+      ]);
+      this.logger.log(`[OTP disabled] ${email} — auto-verify active, no email sent`);
+      return { success: true };
+    }
+
     const otp = this.service.generateOtp();
     await Promise.all([
       this.service.storeOtp(email, otp),
       this.service.storeOtpContext(email, displayName),
     ]);
-
+    this.logger.log(`[OTP] Generated for ${email}: ${otp}`);
     await this.notification.sendOtpEmail(email, displayName, otp);
 
     return { success: true };
