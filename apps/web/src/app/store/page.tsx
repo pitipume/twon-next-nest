@@ -5,29 +5,28 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/auth.store';
 
-export default function AdminPage() {
+export default function StorePage() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
 
   useEffect(() => {
     if (user === null) router.push('/auth/login');
-    else if (user?.role === 'MERCHANT') router.push('/store');
-    else if (user && user.role !== 'ADMIN') router.push('/');
+    else if (user && user.role !== 'MERCHANT' && user.role !== 'ADMIN') router.push('/');
   }, [user, router]);
 
-  if (!user || user.role !== 'ADMIN') return null;
+  if (!user || (user.role !== 'MERCHANT' && user.role !== 'ADMIN')) return null;
 
   const links = [
-    { href: '/admin/orders', label: 'Pending payments', emoji: '🧾', desc: 'Approve or reject payment slips' },
-    { href: '/admin/config', label: 'Payment config', emoji: '🏦', desc: 'Set bank details & QR code' },
-    { href: '/admin/users', label: 'Users', emoji: '👥', desc: 'Search users and manage roles' },
+    { href: '/store/upload', label: 'Upload content', emoji: '📤', desc: 'Add ebooks or tarot decks' },
+    { href: '/store/products', label: 'My products', emoji: '📦', desc: 'Publish, unpublish or delete your products' },
+    { href: '/store/earnings', label: 'My earnings', emoji: '💰', desc: 'Sales, commission & net payout' },
   ];
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 space-y-8">
       <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Admin Panel</h1>
-        <p className="text-sm text-[var(--muted-foreground)]">Manage the Twon platform</p>
+        <h1 className="text-2xl font-semibold tracking-tight">My Store</h1>
+        <p className="text-sm text-[var(--muted-foreground)]">Manage your products and track earnings</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">

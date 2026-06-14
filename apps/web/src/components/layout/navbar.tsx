@@ -34,6 +34,9 @@ export function Navbar() {
     ...(user ? [{ href: '/library', label: t('library') }] : []),
     ...(user ? [{ href: '/profile', label: t('profile') }] : []),
     ...(user?.role === 'MERCHANT' || user?.role === 'ADMIN'
+      ? [{ href: '/store', label: t('myStore') }]
+      : []),
+    ...(user?.role === 'ADMIN'
       ? [{ href: '/admin', label: t('admin') }]
       : []),
   ];

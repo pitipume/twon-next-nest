@@ -221,19 +221,21 @@ When `FEATURE_EMAIL_OTP_ENABLED=true`: OTP is generated, logged to server consol
 - Owned products shown in browse with "In Library" badge + direct reader link
 - Free preview — `GET /catalog/:id/preview` returns signed PDF URL + previewPages count (no auth); shown on detail page if `previewPages > 0`; preview reader caps pages with buy CTA at end
 
-### Admin
+### My Store (`/store`) — MERCHANT + ADMIN
 - Upload ebooks and tarot decks via presigned R2 PUT URLs (client uploads directly)
 - PDF thumbnail auto-generated client-side (pdfjs-dist)
-- Publish / unpublish products
-- Delete draft products
-- View all products list (includes unpublished) — shows uploader displayName
-- `uploadedBy` (userId) saved on every Product — foundation for V2 merchant scoping
+- Publish / unpublish own products (MERCHANT scoped; ADMIN can do any)
+- Delete own draft products (MERCHANT scoped; ADMIN can do any)
+- View own products list — MERCHANT sees only their own; ADMIN sees all
+- `uploadedBy` (userId) saved on every Product; ownership checked on mutate endpoints
+- Earnings dashboard — `GET /admin/merchant-earnings` shows gross/commission/net; MERCHANT filtered to own; ADMIN sees all merchants
+
+### Admin (`/admin`) — ADMIN only
 - Pending payments — approve individually or select-all + batch approve
 - Batch approve: `POST /payment/orders/approve-batch` with `{ orderIds: string[] }`
-- Payment config (bank name, account number, QR image, commission rate %) — ADMIN only
+- Payment config (bank name, account number, QR image, commission rate %) 
 - Commission snapshots written to `OrderItem` at approval time (`commissionRate`, `commissionAmount`, `netAmount`)
-- Merchant earnings dashboard — `GET /admin/merchant-earnings` aggregates completed sales by uploader; shows gross/commission/net per merchant; admin pays net manually month-end
-- Admin nav is role-filtered: MERCHANT sees upload+products only; ADMIN sees all including earnings
+- User management — search by email, change role (CUSTOMER / PREMIUM / MERCHANT / ADMIN)
 
 ### Ebook Reader
 - Scroll mode (virtual scrolling via `@tanstack/react-virtual` — safe for 1000+ pages)
@@ -267,9 +269,10 @@ When `FEATURE_EMAIL_OTP_ENABLED=true`: OTP is generated, logged to server consol
 - **Omise** (Thai PromptPay QR programmatic) when manual slip approval becomes a bottleneck.
 - **Stripe** (international cards) when revenue justifies the setup cost.
 
-### Merchant Scoping (V2)
-- Merchants currently share admin endpoints — no userId filtering yet.
-- When first third-party merchant joins: add `uploadedBy` checks to all admin queries so merchants only see/edit their own products.
+### Merchant Scoping
+- Implemented: `getAllProducts`, `deleteProduct`, `setPublished` all enforce `uploadedBy` ownership check for MERCHANT role.
+- Separate `/store` route for merchant seller tools; `/admin` route for platform management (ADMIN only).
+- When first third-party merchant joins: no backend changes needed — scoping is already enforced.
 
 ### Mobile App
 - Capacitor.js wraps the existing Next.js app → iOS/Android. No rewrite needed.
