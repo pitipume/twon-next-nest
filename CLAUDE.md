@@ -251,6 +251,31 @@ When `FEATURE_EMAIL_OTP_ENABLED=true`: OTP is generated, logged to server consol
 
 ---
 
+## Next Phase (deferred — build when there's real data/users)
+
+### Analytics & Dashboards
+- **Traffic analytics:** Use PostHog cloud free tier (1M events/month, just a script tag) — do NOT build from scratch. Plausible is an alternative ($9/mo cloud or self-hosted VPS).
+- **Admin dashboard:** Gross revenue (all-time + monthly), by product type, commission earned, registered users, top-selling products. Query from Postgres, cache results in Redis (Upstash) with 5-min TTL to avoid hammering the free DB.
+- **Merchant dashboard:** Their own products, items sold, gross/commission/net per product.
+- **Why deferred:** No merchants, no real traffic yet. Dashboard has no data. Build when manually checking the DB to answer business questions — that's the signal.
+
+### Reading Progress
+- Save page/position per user per ebook — not yet implemented.
+- Schema: `ReadingProgress { userId, productId, page, updatedAt }` — add to Prisma when ready.
+
+### Payment Upgrade
+- **Omise** (Thai PromptPay QR programmatic) when manual slip approval becomes a bottleneck.
+- **Stripe** (international cards) when revenue justifies the setup cost.
+
+### Merchant Scoping (V2)
+- Merchants currently share admin endpoints — no userId filtering yet.
+- When first third-party merchant joins: add `uploadedBy` checks to all admin queries so merchants only see/edit their own products.
+
+### Mobile App
+- Capacitor.js wraps the existing Next.js app → iOS/Android. No rewrite needed.
+
+---
+
 ## Development Principles
 
 - **Mobile-first** responsive design (then tablet, desktop)
