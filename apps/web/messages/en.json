@@ -47,6 +47,7 @@
       "password": "Password",
       "confirmPassword": "Confirm password",
       "submit": "Send OTP",
+      "submitNoOtp": "Create account",
       "hasAccount": "Already have an account?",
       "signIn": "Sign in"
     },

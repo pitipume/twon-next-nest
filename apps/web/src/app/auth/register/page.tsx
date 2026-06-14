@@ -111,7 +111,7 @@ export default function RegisterPage() {
             {...register('confirmPassword')}
           />
           <Button type="submit" className="w-full" loading={isSubmitting}>
-            {t('submit')}
+            {Features.emailOtp ? t('submit') : t('submitNoOtp')}
           </Button>
         </form>
 

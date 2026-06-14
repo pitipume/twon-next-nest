@@ -47,6 +47,7 @@
       "password": "รหัสผ่าน",
       "confirmPassword": "ยืนยันรหัสผ่าน",
       "submit": "ส่ง OTP",
+      "submitNoOtp": "สร้างบัญชี",
       "hasAccount": "มีบัญชีอยู่แล้ว?",
       "signIn": "เข้าสู่ระบบ"
     },
