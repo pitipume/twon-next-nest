@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -23,6 +24,7 @@ import { AdminService } from './services/admin.service';
 import { UploadEbookDto } from './dto/upload-ebook.dto';
 import { UploadTarotDeckDto } from './dto/upload-tarot-deck.dto';
 import { SetPaymentConfigDto } from './dto/set-payment-config.dto';
+import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { ApiResponse } from '../../common/response/api-response';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -109,6 +111,29 @@ export class AdminController {
   getAllProducts(@CurrentUser() user: { id: string; role: string }) {
     const merchantId = user.role === UserRole.ADMIN ? undefined : user.id;
     return this.service.getAllProducts(merchantId);
+  }
+
+  // GET /api/admin/users/search?email=xxx  [ADMIN only]
+  @Get('users/search')
+  @Roles(UserRole.ADMIN)
+  async searchUser(@Query('email') email: string) {
+    if (!email) return ApiResponse.failure('Email is required.');
+    const user = await this.service.findUserByEmail(email);
+    if (!user) return ApiResponse.failure('No user found with that email.');
+    return ApiResponse.success(user);
+  }
+
+  // PATCH /api/admin/users/role  [ADMIN only]
+  @Patch('users/role')
+  @Roles(UserRole.ADMIN)
+  async updateUserRole(@CurrentUser() admin: { id: string }, @Body() dto: UpdateUserRoleDto) {
+    try {
+      const user = await this.service.updateUserRole(dto.userId, dto.role, admin.id);
+      return ApiResponse.success(user, `Role updated to ${dto.role}.`);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Failed to update role.';
+      return ApiResponse.failure(msg);
+    }
   }
 
   // GET /api/admin/payment-config — load current config  [ADMIN only]

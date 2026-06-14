@@ -18,19 +18,26 @@ export default function AdminPage() {
 
   if (!user) return null;
 
+  const isMerchant = user.role === 'MERCHANT';
+
   const links = [
     { href: '/admin/upload', label: 'Upload content', emoji: '📤', desc: 'Add ebooks or tarot decks', roles: ['MERCHANT', 'ADMIN'] },
-    { href: '/admin/products', label: 'Products', emoji: '📦', desc: 'Publish or unpublish content', roles: ['MERCHANT', 'ADMIN'] },
+    { href: '/admin/products', label: 'My products', emoji: '📦', desc: 'Publish, unpublish or delete your products', roles: ['MERCHANT', 'ADMIN'] },
+    { href: '/admin/earnings', label: 'My earnings', emoji: '💰', desc: 'Sales, commission & net payout', roles: ['MERCHANT', 'ADMIN'] },
     { href: '/admin/orders', label: 'Pending payments', emoji: '🧾', desc: 'Approve or reject payment slips', roles: ['ADMIN'] },
     { href: '/admin/config', label: 'Payment config', emoji: '🏦', desc: 'Set bank details & QR code', roles: ['ADMIN'] },
-    { href: '/admin/earnings', label: 'My earnings', emoji: '💰', desc: 'Sales, commission & net payout', roles: ['MERCHANT', 'ADMIN'] },
+    { href: '/admin/users', label: 'Users', emoji: '👥', desc: 'Search users and manage roles', roles: ['ADMIN'] },
   ].filter((l) => l.roles.includes(user.role));
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 space-y-8">
       <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Admin</h1>
-        <p className="text-sm text-[var(--muted-foreground)]">Manage your Twon store</p>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          {isMerchant ? 'My Store' : 'Admin Panel'}
+        </h1>
+        <p className="text-sm text-[var(--muted-foreground)]">
+          {isMerchant ? 'Manage your products and track earnings' : 'Manage the Twon platform'}
+        </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">

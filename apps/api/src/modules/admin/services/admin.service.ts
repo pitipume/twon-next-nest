@@ -240,6 +240,22 @@ export class AdminService {
     });
   }
 
+  async findUserByEmail(email: string) {
+    return this.prisma.user.findUnique({
+      where: { email: email.toLowerCase().trim() },
+      select: { id: true, email: true, displayName: true, role: true, createdAt: true },
+    });
+  }
+
+  async updateUserRole(userId: string, role: UserRole, requesterId: string) {
+    if (userId === requesterId) throw new BadRequestException('You cannot change your own role.');
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { role },
+      select: { id: true, email: true, displayName: true, role: true },
+    });
+  }
+
   async getMerchantEarnings(merchantId?: string) {
     const items = await this.prisma.orderItem.findMany({
       where: {
