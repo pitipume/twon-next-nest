@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { BackButton } from '@/components/ui/back-button';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import { toast } from 'sonner';
@@ -47,6 +48,7 @@ export default function PendingOrdersPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 space-y-8">
+      <BackButton fallback="/admin" />
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold">Pending payments</h1>

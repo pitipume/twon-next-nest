@@ -64,7 +64,7 @@ export class AdminService {
     language: string;
     categories: string[];
     tags: string[];
-    adminId: string;
+    userId: string;
     pdfKey: string;
     coverKey?: string;
     totalPages?: number;
@@ -82,7 +82,7 @@ export class AdminService {
       tags: params.tags,
       previewPages: params.previewPages,
       isPublished: false,
-      createdBy: params.adminId,
+      createdBy: params.userId,
     });
 
     const mongoId = ebook._id.toString();
@@ -95,6 +95,7 @@ export class AdminService {
         title: params.title,
         priceTHB: params.priceTHB,
         isPublished: false,
+        uploadedBy: params.userId,
       },
     });
 
@@ -110,7 +111,7 @@ export class AdminService {
     name: string;
     description?: string;
     priceTHB: number;
-    adminId: string;
+    userId: string;
     zipKey: string;
     coverKey?: string;
     backKey?: string;
@@ -123,7 +124,7 @@ export class AdminService {
       backImageKey: params.backKey ?? '',
       cardCount: 0,
       isPublished: false,
-      createdBy: params.adminId,
+      createdBy: params.userId,
       cards: [],
     });
 
@@ -186,6 +187,7 @@ export class AdminService {
         title: params.name,
         priceTHB: params.priceTHB,
         isPublished: false,
+        uploadedBy: params.userId,
       },
     });
 
@@ -204,7 +206,15 @@ export class AdminService {
     return this.prisma.product.findMany({
       where: { isDeleted: false },
       orderBy: { createdAt: 'desc' },
-      select: { id: true, title: true, productType: true, priceTHB: true, isPublished: true, createdAt: true },
+      select: {
+        id: true,
+        title: true,
+        productType: true,
+        priceTHB: true,
+        isPublished: true,
+        createdAt: true,
+        uploader: { select: { id: true, displayName: true } },
+      },
     });
   }
 

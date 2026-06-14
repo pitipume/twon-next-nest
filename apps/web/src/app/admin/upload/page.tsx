@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { BackButton } from '@/components/ui/back-button';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -356,6 +357,7 @@ export default function UploadPage() {
 
   return (
     <div className="mx-auto max-w-xl px-4 py-10 space-y-8">
+      <BackButton fallback="/admin" />
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold">Upload content</h1>
         <p className="text-sm text-[var(--muted-foreground)]">Add a new ebook or tarot deck</p>

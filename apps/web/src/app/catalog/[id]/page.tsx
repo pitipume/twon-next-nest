@@ -1,6 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
+import { BackButton } from '@/components/ui/back-button';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import Image from 'next/image';
 import { toast } from 'sonner';
@@ -59,7 +60,8 @@ export default function ProductDetailPage() {
   const readHref = isEbook ? `/library/ebook/${id}` : `/library/tarot/${id}`;
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10">
+    <div className="mx-auto max-w-4xl px-4 py-10 space-y-6">
+      <BackButton fallback="/" />
       <div className="flex flex-col gap-8 sm:flex-row">
         {/* Cover */}
         <div className="relative aspect-[2/3] w-full max-w-[220px] self-start overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--muted)] sm:shrink-0">

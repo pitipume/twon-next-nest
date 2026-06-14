@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { BackButton } from '@/components/ui/back-button';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -66,6 +67,7 @@ export default function PaymentConfigPage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-10 space-y-8">
+      <BackButton fallback="/admin" />
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold">Payment config</h1>
         <p className="text-sm text-[var(--muted-foreground)]">Bank details shown at checkout</p>

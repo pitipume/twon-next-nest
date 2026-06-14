@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { BackButton } from '@/components/ui/back-button';
 import { toast } from 'sonner';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ interface AdminProduct {
   priceTHB: number;
   isPublished: boolean;
   createdAt: string;
+  uploader?: { id: string; displayName: string } | null;
 }
 
 export default function AdminProductsPage() {
@@ -58,6 +60,7 @@ export default function AdminProductsPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 space-y-6">
+      <BackButton fallback="/admin" />
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold">Products</h1>
         <p className="text-sm text-[var(--muted-foreground)]">
@@ -91,6 +94,7 @@ export default function AdminProductsPage() {
                 <p className="mt-1 text-sm font-medium truncate">{p.title}</p>
                 <p className="text-xs text-[var(--muted-foreground)]">
                   ฿{Number(p.priceTHB).toLocaleString()} · {new Date(p.createdAt).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' })}
+                  {p.uploader && <span> · by {p.uploader.displayName}</span>}
                 </p>
               </div>
 

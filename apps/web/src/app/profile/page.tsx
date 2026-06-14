@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { BackButton } from '@/components/ui/back-button';
 import { useAuthStore } from '@/store/auth.store';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -93,6 +94,7 @@ export default function ProfilePage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 space-y-6">
+      <BackButton fallback="/" />
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
         <p className="text-sm text-[var(--muted-foreground)]">{t('subtitle')}</p>

@@ -51,6 +51,7 @@ model User {
   refreshTokens   RefreshToken[]
   orders          Order[]
   libraryItems    LibraryItem[]
+  uploadedProducts Product[]
 
   @@map("users")
 }
@@ -79,13 +80,16 @@ model Product {
   priceTHB     Decimal     @db.Decimal(10, 2)
   isPublished  Boolean     @default(false)
   isDeleted    Boolean     @default(false)
+  uploadedBy   String?
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 
+  uploader     User?       @relation(fields: [uploadedBy], references: [id])
   orderItems   OrderItem[]
   libraryItems LibraryItem[]
 
   @@index([productType])
+  @@index([uploadedBy])
   @@map("products")
 }
 

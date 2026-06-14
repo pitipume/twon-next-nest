@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { BackButton } from '@/components/ui/back-button';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import Image from 'next/image';
@@ -84,6 +85,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 space-y-8">
+      <BackButton fallback="/" />
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Complete your payment</h1>
         <p className="text-sm text-[var(--muted-foreground)]">Order #{orderId.slice(0, 8)}</p>
