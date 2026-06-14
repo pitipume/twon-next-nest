@@ -44,7 +44,8 @@ api.interceptors.response.use(
         {},
         { withCredentials: true },
       );
-      const newToken: string = data.data?.accessToken;
+      const newToken: string | undefined = data.data?.accessToken;
+      if (!newToken) throw new Error('No token in refresh response');
       useAuthStore.getState().setAccessToken(newToken);
       refreshQueue.forEach((cb) => cb(newToken));
       refreshQueue = [];
