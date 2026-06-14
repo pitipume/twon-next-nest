@@ -33,14 +33,15 @@ export class StoreManager {
     return {
       success: true,
       data: {
-        orderId: order.id,
+        id: order.id,
         totalTHB: Number(order.totalTHB),
+        status: order.status,
         items: order.orderItems.map((i) => ({
           productId: i.productId,
           title: products.find((p) => p.id === i.productId)?.title,
           priceTHB: Number(i.priceTHB),
         })),
-        payment: checkoutInfo, // bank name, account number, QR image URL
+        checkoutInfo,
       },
     } as const;
   }
@@ -49,7 +50,20 @@ export class StoreManager {
     const order = await this.service.getOrderById(orderId);
     if (!order) return { success: false, message: 'Order not found.' } as const;
     if (order.userId !== userId) return { success: false, message: 'Order not found.' } as const;
-    return { success: true, data: order } as const;
+
+    const checkoutInfo = await this.service.getCheckoutInfo();
+    return {
+      success: true,
+      data: {
+        ...order,
+        totalTHB: Number(order.totalTHB),
+        orderItems: order.orderItems.map((i) => ({
+          ...i,
+          priceTHB: Number(i.priceTHB),
+        })),
+        checkoutInfo,
+      },
+    } as const;
   }
 
   async getMyOrders(userId: string) {
