@@ -205,9 +205,12 @@ export class AdminService {
     return { ...config, qrImageUrl };
   }
 
-  async getAllProducts() {
+  async getAllProducts(merchantId?: string) {
     return this.prisma.product.findMany({
-      where: { isDeleted: false },
+      where: {
+        isDeleted: false,
+        ...(merchantId ? { uploadedBy: merchantId } : {}),
+      },
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
@@ -308,9 +311,10 @@ export class AdminService {
 
   // ─── Delete (draft only) ─────────────────────────────────────────────────
 
-  async deleteProduct(productId: string) {
+  async deleteProduct(productId: string, requesterId: string, isAdmin: boolean) {
     const product = await this.prisma.product.findUnique({ where: { id: productId } });
     if (!product) throw new NotFoundException('Product not found.');
+    if (!isAdmin && product.uploadedBy !== requesterId) throw new NotFoundException('Product not found.');
     if (product.isPublished) throw new BadRequestException('Unpublish the product before deleting it.');
 
     await this.prisma.product.update({
@@ -321,7 +325,11 @@ export class AdminService {
 
   // ─── Publish / Unpublish ──────────────────────────────────────────────────
 
-  async setPublished(productId: string, isPublished: boolean) {
+  async setPublished(productId: string, isPublished: boolean, requesterId: string, isAdmin: boolean) {
+    if (!isAdmin) {
+      const existing = await this.prisma.product.findUnique({ where: { id: productId } });
+      if (!existing || existing.uploadedBy !== requesterId) throw new NotFoundException('Product not found.');
+    }
     const product = await this.prisma.product.update({
       where: { id: productId },
       data: { isPublished },

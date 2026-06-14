@@ -119,7 +119,7 @@ export default function HomePage() {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder={t('searchPlaceholder')}
+          placeholder={Features.etarot ? t('searchPlaceholder') : t('searchPlaceholderEbook')}
           className="w-full h-11 pl-10 pr-4 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
         />
       </div>

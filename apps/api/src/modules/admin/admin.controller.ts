@@ -86,28 +86,29 @@ export class AdminController {
     return { code: 'A001', status: 'success', data: result };
   }
 
-  // DELETE /api/admin/products/:id — draft only
+  // DELETE /api/admin/products/:id — draft only; merchant can only delete own
   @Delete('products/:id')
-  deleteProduct(@Param('id') id: string) {
-    return this.service.deleteProduct(id);
+  deleteProduct(@Param('id') id: string, @CurrentUser() user: { id: string; role: string }) {
+    return this.service.deleteProduct(id, user.id, user.role === UserRole.ADMIN);
   }
 
-  // PATCH /api/admin/products/:id/publish
+  // PATCH /api/admin/products/:id/publish — merchant can only publish own
   @Patch('products/:id/publish')
-  publish(@Param('id') id: string) {
-    return this.service.setPublished(id, true);
+  publish(@Param('id') id: string, @CurrentUser() user: { id: string; role: string }) {
+    return this.service.setPublished(id, true, user.id, user.role === UserRole.ADMIN);
   }
 
-  // PATCH /api/admin/products/:id/unpublish
+  // PATCH /api/admin/products/:id/unpublish — merchant can only unpublish own
   @Patch('products/:id/unpublish')
-  unpublish(@Param('id') id: string) {
-    return this.service.setPublished(id, false);
+  unpublish(@Param('id') id: string, @CurrentUser() user: { id: string; role: string }) {
+    return this.service.setPublished(id, false, user.id, user.role === UserRole.ADMIN);
   }
 
-  // GET /api/admin/products — list all products including unpublished
+  // GET /api/admin/products — admin sees all; merchant sees own only
   @Get('products')
-  getAllProducts() {
-    return this.service.getAllProducts();
+  getAllProducts(@CurrentUser() user: { id: string; role: string }) {
+    const merchantId = user.role === UserRole.ADMIN ? undefined : user.id;
+    return this.service.getAllProducts(merchantId);
   }
 
   // GET /api/admin/payment-config — load current config  [ADMIN only]
