@@ -56,10 +56,15 @@ export class LibraryService {
     const items = await this.repository.getUserLibrary(userId);
     if (!items.length) return items.map((i) => ({ ...i, product: { ...i.product, coverImageUrl: '' } }));
     const coverMap = await this.catalogRepository.findCoverImageUrls(items.map((i) => i.product.mongoRefId));
-    return items.map((i) => ({
-      ...i,
-      product: { ...i.product, coverImageUrl: coverMap.get(i.product.mongoRefId) ?? '' },
-    }));
+    return Promise.all(
+      items.map(async (i) => ({
+        ...i,
+        product: {
+          ...i.product,
+          coverImageUrl: await this.signCoverUrl(coverMap.get(i.product.mongoRefId) ?? ''),
+        },
+      })),
+    );
   }
 
   async userCreatedProduct(userId: string, productId: string): Promise<boolean> {

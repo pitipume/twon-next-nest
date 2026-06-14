@@ -51,13 +51,13 @@ export default function PaymentConfigPage() {
     try {
       const form = new FormData();
       form.append('file', qrFile);
-      await api.post('/admin/payment-config/qr', form, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      // Do NOT set Content-Type manually — axios sets it with the correct multipart boundary
+      await api.post('/admin/payment-config/qr', form);
       toast.success('QR image uploaded!');
       setQrFile(null);
-    } catch {
-      toast.error('QR upload failed.');
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'QR upload failed.';
+      toast.error(msg);
     } finally {
       setUploadingQr(false);
     }

@@ -74,4 +74,15 @@ export class CatalogService {
       cardCount: deck.cardCount,
     };
   }
+
+  async getEbookPreview(productId: string) {
+    const product = await this.repository.findProductById(productId);
+    if (!product || !product.isPublished) return null;
+
+    const ebook = await this.repository.findEbookByProductId(productId);
+    if (!ebook || !ebook.fileKey || !ebook.previewPages) return null;
+
+    const pdfUrl = await this.storage.getSignedReadUrl(ebook.fileKey, 60 * 30); // 30 min
+    return { pdfUrl, previewPages: ebook.previewPages, title: ebook.title };
+  }
 }

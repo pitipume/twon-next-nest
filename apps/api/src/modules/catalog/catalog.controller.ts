@@ -1,13 +1,18 @@
-import { BadRequestException, Controller, Get, Param, Query } from '@nestjs/common';
+import { BadRequestException, Controller, Get, NotFoundException, Param, Query } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { GetProductsQuery } from './queries/get-products/get-products.query';
 import { GetProductDetailQuery } from './queries/get-product-detail/get-product-detail.query';
+import { CatalogManager } from './managers/catalog.manager';
+import { ApiResponse } from '../../common/response/api-response';
 
 const VALID_TYPES = ['ebook', 'tarot_deck'];
 
 @Controller('catalog')
 export class CatalogController {
-  constructor(private readonly queryBus: QueryBus) {}
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly manager: CatalogManager,
+  ) {}
 
   // GET /api/catalog?type=ebook&page=1&limit=20
   @Get()
@@ -33,6 +38,14 @@ export class CatalogController {
   @Get('tarot-decks/:id')
   getTarotDeck(@Param('id') id: string) {
     return this.queryBus.execute(new GetProductDetailQuery(id, 'tarot_deck'));
+  }
+
+  // GET /api/catalog/:id/preview — signed PDF URL for free preview pages (no auth required)
+  @Get(':id/preview')
+  async getEbookPreview(@Param('id') id: string) {
+    const result = await this.manager.getEbookPreview(id);
+    if (!result) throw new NotFoundException('Preview not available for this product.');
+    return ApiResponse.success(result);
   }
 
   // GET /api/catalog/:id — generic, auto-detects ebook or tarot deck by product ID

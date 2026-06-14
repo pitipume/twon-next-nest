@@ -130,7 +130,7 @@ export default function CheckoutPage() {
           </p>
         </div>
       ) : (
-        <div className="rounded-xl border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-700">
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--muted)] p-4 text-sm text-[var(--foreground)]">
           Payment details not configured yet. Please contact support.
         </div>
       )}

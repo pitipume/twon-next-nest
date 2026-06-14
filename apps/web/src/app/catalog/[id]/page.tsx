@@ -116,19 +116,33 @@ export default function ProductDetailPage() {
               <Button size="lg" className="w-full sm:w-auto" onClick={() => router.push(readHref)}>
                 {isEbook ? 'Read now →' : 'Open deck →'}
               </Button>
-            ) : user ? (
-              <Button
-                size="lg"
-                className="w-full sm:w-auto"
-                loading={buyMutation.isPending}
-                onClick={() => buyMutation.mutate()}
-              >
-                Buy now
-              </Button>
             ) : (
-              <Button size="lg" className="w-full sm:w-auto" onClick={() => router.push('/auth/login')}>
-                Sign in to buy
-              </Button>
+              <div className="flex flex-wrap gap-3">
+                {user ? (
+                  <Button
+                    size="lg"
+                    className="w-full sm:w-auto"
+                    loading={buyMutation.isPending}
+                    onClick={() => buyMutation.mutate()}
+                  >
+                    Buy now
+                  </Button>
+                ) : (
+                  <Button size="lg" className="w-full sm:w-auto" onClick={() => router.push('/auth/login')}>
+                    Sign in to buy
+                  </Button>
+                )}
+                {isEbook && (product.previewPages ?? 0) > 0 && (
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="w-full sm:w-auto"
+                    onClick={() => router.push(`/catalog/${id}/preview`)}
+                  >
+                    Preview ({product.previewPages} pages)
+                  </Button>
+                )}
+              </div>
             )}
           </div>
         </div>

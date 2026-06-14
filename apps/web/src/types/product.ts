@@ -15,6 +15,8 @@ export interface Product {
   categories?: string[];
   tags?: string[];
   cardCount?: number;
+  previewPages?: number;
+  totalPages?: number;
 }
 
 export interface EbookSession {

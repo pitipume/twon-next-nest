@@ -31,4 +31,8 @@ export class CatalogManager {
       ? this.getEbookDetail(productId)
       : this.getTarotDeckDetail(productId);
   }
+
+  async getEbookPreview(productId: string) {
+    return this.service.getEbookPreview(productId);
+  }
 }

@@ -23,6 +23,7 @@ import { AdminService } from './services/admin.service';
 import { UploadEbookDto } from './dto/upload-ebook.dto';
 import { UploadTarotDeckDto } from './dto/upload-tarot-deck.dto';
 import { SetPaymentConfigDto } from './dto/set-payment-config.dto';
+import { ApiResponse } from '../../common/response/api-response';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.MERCHANT, UserRole.ADMIN)
@@ -109,27 +110,33 @@ export class AdminController {
     return this.service.getAllProducts();
   }
 
-  // GET /api/admin/payment-config — load current config
+  // GET /api/admin/payment-config — load current config  [ADMIN only]
   @Get('payment-config')
-  getPaymentConfig() {
-    return this.service.getPaymentConfig();
+  @Roles(UserRole.ADMIN)
+  async getPaymentConfig() {
+    const config = await this.service.getPaymentConfig();
+    return ApiResponse.success(config);
   }
 
-  // PUT /api/admin/payment-config — set bank name + account details
+  // PUT /api/admin/payment-config — set bank name + account details  [ADMIN only]
   @Put('payment-config')
-  setPaymentConfig(@Body() dto: SetPaymentConfigDto) {
-    return this.service.setPaymentConfig({
+  @Roles(UserRole.ADMIN)
+  async setPaymentConfig(@Body() dto: SetPaymentConfigDto) {
+    const result = await this.service.setPaymentConfig({
       bankName: dto.bankName,
       accountName: dto.accountName,
       accountNumber: dto.accountNumber,
     });
+    return ApiResponse.success(result);
   }
 
-  // POST /api/admin/payment-config/qr — upload PromptPay QR image (still multipart, small file)
+  // POST /api/admin/payment-config/qr — upload PromptPay QR image  [ADMIN only]
   @Post('payment-config/qr')
+  @Roles(UserRole.ADMIN)
   @UseInterceptors(FileInterceptor('file'))
   async uploadPaymentQr(@UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('QR image file is required.');
-    return this.service.uploadPaymentQr(file.buffer, file.mimetype);
+    const result = await this.service.uploadPaymentQr(file.buffer, file.mimetype);
+    return ApiResponse.success(result);
   }
 }
