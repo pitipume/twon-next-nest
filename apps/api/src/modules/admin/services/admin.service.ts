@@ -199,7 +199,10 @@ export class AdminService {
   // ─── Payment config ───────────────────────────────────────────────────────
 
   async getPaymentConfig() {
-    return this.prisma.paymentConfig.findUnique({ where: { id: 'singleton' } });
+    const config = await this.prisma.paymentConfig.findUnique({ where: { id: 'singleton' } });
+    if (!config?.qrImageKey) return config;
+    const qrImageUrl = await this.storage.getSignedReadUrl(config.qrImageKey, 60 * 60);
+    return { ...config, qrImageUrl };
   }
 
   async getAllProducts() {

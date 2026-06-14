@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { BackButton } from '@/components/ui/back-button';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { toast } from 'sonner';
+import Image from 'next/image';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,41 +21,48 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
+interface PaymentConfig {
+  bankName: string;
+  accountName: string;
+  accountNumber: string;
+  commissionRate: string | number;
+  qrImageKey?: string;
+  qrImageUrl?: string;
+}
+
 export default function PaymentConfigPage() {
+  const qc = useQueryClient();
   const [qrFile, setQrFile] = useState<File | null>(null);
   const [uploadingQr, setUploadingQr] = useState(false);
-  const [loading, setLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
-    resolver: zodResolver(schema),
+  const { data: config, isLoading } = useQuery({
+    queryKey: ['payment-config'],
+    queryFn: async () => {
+      const res = await api.get('/admin/payment-config');
+      return res.data.data as PaymentConfig | null;
+    },
   });
 
-  useEffect(() => {
-    api.get('/admin/payment-config')
-      .then(({ data }) => {
-        if (data?.data) {
-          const cfg = data.data;
-          reset({
-            bankName: cfg.bankName,
-            accountName: cfg.accountName,
-            accountNumber: cfg.accountNumber,
-            commissionRatePercent: Math.round((cfg.commissionRate ?? 0) * 100),
-          });
+  // `values` syncs the form whenever config changes (on load or after refetch)
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    values: config
+      ? {
+          bankName: config.bankName,
+          accountName: config.accountName,
+          accountNumber: config.accountNumber,
+          commissionRatePercent: Math.round(Number(config.commissionRate ?? 0) * 100),
         }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [reset]);
+      : undefined,
+  });
 
   async function onSubmit(data: FormData) {
     try {
       const { commissionRatePercent, ...rest } = data;
-      await api.put('/admin/payment-config', {
-        ...rest,
-        commissionRate: commissionRatePercent / 100,
-      });
+      await api.put('/admin/payment-config', { ...rest, commissionRate: commissionRatePercent / 100 });
       toast.success('Payment config saved!');
+      qc.invalidateQueries({ queryKey: ['payment-config'] });
     } catch {
       toast.error('Failed to save config.');
     }
@@ -63,12 +72,13 @@ export default function PaymentConfigPage() {
     if (!qrFile) return;
     setUploadingQr(true);
     try {
-      const form = new FormData();
-      form.append('file', qrFile);
-      // Do NOT set Content-Type manually — axios sets it with the correct multipart boundary
-      await api.post('/admin/payment-config/qr', form);
+      const formData = new FormData();
+      formData.append('file', qrFile);
+      await api.post('/admin/payment-config/qr', formData);
       toast.success('QR image uploaded!');
       setQrFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      qc.invalidateQueries({ queryKey: ['payment-config'] });
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'QR upload failed.';
       toast.error(msg);
@@ -77,7 +87,7 @@ export default function PaymentConfigPage() {
     }
   }
 
-  if (loading) return <PageSpinner />;
+  if (isLoading) return <PageSpinner />;
 
   return (
     <div className="mx-auto max-w-lg px-4 py-10 space-y-8">
@@ -111,6 +121,16 @@ export default function PaymentConfigPage() {
       <div className="space-y-3 rounded-xl border border-[var(--border)] p-4">
         <h2 className="text-sm font-medium">PromptPay QR image</h2>
         <p className="text-xs text-[var(--muted-foreground)]">Upload the QR code image customers will scan to pay</p>
+
+        {config?.qrImageUrl && (
+          <div className="flex items-center gap-3">
+            <div className="relative h-24 w-24 rounded-lg border border-[var(--border)] overflow-hidden bg-white shrink-0">
+              <Image src={config.qrImageUrl} alt="Current QR code" fill className="object-contain p-1" />
+            </div>
+            <p className="text-xs text-[var(--muted-foreground)]">Current QR — tap below to replace</p>
+          </div>
+        )}
+
         <input
           ref={fileInputRef}
           type="file"
@@ -123,7 +143,7 @@ export default function PaymentConfigPage() {
           onClick={() => fileInputRef.current?.click()}
           className="w-full rounded-lg border-2 border-dashed border-[var(--border)] py-4 text-sm text-[var(--muted-foreground)] hover:border-violet-500 hover:text-violet-600 transition-colors active:opacity-70"
         >
-          {qrFile ? `Selected: ${qrFile.name}` : 'Tap to select QR image (JPG / PNG / WebP)'}
+          {qrFile ? `Selected: ${qrFile.name}` : config?.qrImageUrl ? 'Tap to replace QR image' : 'Tap to select QR image (JPG / PNG / WebP)'}
         </button>
         {qrFile && (
           <Button className="w-full" loading={uploadingQr} onClick={uploadQr}>
