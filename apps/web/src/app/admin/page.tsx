@@ -23,7 +23,7 @@ export default function AdminPage() {
     { href: '/admin/products', label: 'Products', emoji: '📦', desc: 'Publish or unpublish content', roles: ['MERCHANT', 'ADMIN'] },
     { href: '/admin/orders', label: 'Pending payments', emoji: '🧾', desc: 'Approve or reject payment slips', roles: ['ADMIN'] },
     { href: '/admin/config', label: 'Payment config', emoji: '🏦', desc: 'Set bank details & QR code', roles: ['ADMIN'] },
-    { href: '/admin/earnings', label: 'Merchant earnings', emoji: '💰', desc: 'Per-merchant sales & commission totals', roles: ['ADMIN'] },
+    { href: '/admin/earnings', label: 'My earnings', emoji: '💰', desc: 'Sales, commission & net payout', roles: ['MERCHANT', 'ADMIN'] },
   ].filter((l) => l.roles.includes(user.role));
 
   return (

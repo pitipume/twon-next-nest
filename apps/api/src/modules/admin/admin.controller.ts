@@ -131,11 +131,11 @@ export class AdminController {
     return ApiResponse.success(result);
   }
 
-  // GET /api/admin/merchant-earnings — per-merchant sales & commission totals  [ADMIN only]
+  // GET /api/admin/merchant-earnings — ADMIN sees all merchants; MERCHANT sees own only
   @Get('merchant-earnings')
-  @Roles(UserRole.ADMIN)
-  async getMerchantEarnings() {
-    const data = await this.service.getMerchantEarnings();
+  async getMerchantEarnings(@CurrentUser() user: { id: string; role: string }) {
+    const merchantId = user.role === UserRole.ADMIN ? undefined : user.id;
+    const data = await this.service.getMerchantEarnings(merchantId);
     return ApiResponse.success(data);
   }
 

@@ -237,11 +237,13 @@ export class AdminService {
     });
   }
 
-  async getMerchantEarnings() {
+  async getMerchantEarnings(merchantId?: string) {
     const items = await this.prisma.orderItem.findMany({
       where: {
         order: { status: OrderStatus.COMPLETED },
-        product: { uploadedBy: { not: null } },
+        product: merchantId
+          ? { uploadedBy: merchantId }          // merchant: own products only
+          : { uploadedBy: { not: null } },      // admin: all merchants
       },
       include: {
         product: {
