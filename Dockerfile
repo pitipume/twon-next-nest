@@ -20,4 +20,4 @@ RUN ls /app/apps/api/dist/main.js
 ENV NODE_ENV=production
 EXPOSE 3000
 
-CMD ["sh", "-c", "cd apps/api && npx prisma db push --schema=prisma/schema.prisma --url=${DATABASE_URL} --accept-data-loss && node dist/main"]
+CMD ["sh", "-c", "cd apps/api && npx prisma migrate deploy && node dist/main"]

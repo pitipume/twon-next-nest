@@ -293,6 +293,11 @@ When `FEATURE_EMAIL_OTP_ENABLED=true`: OTP is generated, logged to server consol
   - Skip unit tests for thin handlers/controllers that only pass data through (no logic to test)
   - Do NOT chase 99-100% coverage — mocks hide real SDK behavior (e.g. Resend SDK returns `{error}` instead of throwing; a mock that throws gives false confidence)
   - When a bug escapes to production, add a test that would have caught it
+- **Database schema changes (Postgres/Prisma):**
+  - Production runs `prisma migrate deploy` on boot (`Dockerfile` CMD) — it only ever applies committed, versioned SQL from `apps/api/prisma/migrations/`, never diffs live schema against `schema.prisma`
+  - Never use `prisma db push` against a database that holds real data — it silently drops columns/data on drift. `db push` is fine for quick local iteration only, never commit that as the deploy command again
+  - Workflow for any schema change: edit `schema.prisma` → run `npx prisma migrate dev --name <description>` locally (against docker-compose Postgres) → commit the generated migration folder → deploy runs it automatically
+  - Baseline migration is `0_init` (generated 2026-08-09, `prisma migrate diff --from-empty --to-schema`) — represents the schema as it already existed in production before migration history was introduced
 
 ---
 
