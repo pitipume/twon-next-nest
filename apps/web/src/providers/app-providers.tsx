@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import axios from 'axios';
 import { useAuthStore } from '@/store/auth.store';
+import { PostHogProvider } from './posthog-provider';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,9 +43,11 @@ function AuthBootstrap() {
 export default function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthBootstrap />
-      {children}
-      <Toaster position="top-right" richColors closeButton />
+      <PostHogProvider>
+        <AuthBootstrap />
+        {children}
+        <Toaster position="top-right" richColors closeButton />
+      </PostHogProvider>
     </QueryClientProvider>
   );
 }

@@ -256,15 +256,20 @@ When `FEATURE_EMAIL_OTP_ENABLED=true`: OTP is generated, logged to server consol
 - Tarot session endpoint (returns signed card image URLs)
 - Library covers signed correctly (was returning raw R2 keys — fixed)
 
+### Analytics
+- **Traffic analytics via PostHog** (cloud free tier) — `apps/web/src/providers/posthog-provider.tsx`, wired into `AppProviders`. Autocapture + manual `$pageview` tracking on route change (App Router client-side nav doesn't trigger a real page load, so `capture_pageview: false` + a `usePathname`/`useSearchParams` effect handles it). Calls `posthog.identify(user.id, {email, role})` once a user is logged in, `posthog.reset()` on logout.
+- **No-ops when `NEXT_PUBLIC_POSTHOG_KEY` is unset** — local dev is untracked by default; only set the key in Vercel's dashboard for production.
+- **"Admin only" access is enforced by PostHog's own login**, not app code — the dashboard lives at PostHog's own site (separate from Twon's `/admin`), so only invite ADMIN-role humans (Poom + dad) to the PostHog project.
+- **Known gap:** no cookie-consent banner yet for PDPA/GDPR-style compliance — deliberately out of scope for this pass, revisit if it becomes a real requirement.
+
 ---
 
 ## Next Phase (deferred — build when there's real data/users)
 
-### Analytics & Dashboards
-- **Traffic analytics:** Use PostHog cloud free tier (1M events/month, just a script tag) — do NOT build from scratch. Plausible is an alternative ($9/mo cloud or self-hosted VPS).
+### Admin & Merchant Dashboards
 - **Admin dashboard:** Gross revenue (all-time + monthly), by product type, commission earned, registered users, top-selling products. Query from Postgres, cache results in Redis (Upstash) with 5-min TTL to avoid hammering the free DB.
 - **Merchant dashboard:** Their own products, items sold, gross/commission/net per product.
-- **Why deferred:** No merchants, no real traffic yet. Dashboard has no data. Build when manually checking the DB to answer business questions — that's the signal.
+- **Why deferred:** No merchants yet. Dashboard has no data. Build when manually checking the DB to answer business questions — that's the signal. (Traffic analytics — separate from this — is implemented via PostHog, see "Analytics" above.)
 
 ### Reading Progress
 - Save page/position per user per ebook — not yet implemented.
