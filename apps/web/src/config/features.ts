@@ -3,4 +3,5 @@
 export const Features = {
   etarot: process.env.NEXT_PUBLIC_FEATURE_ETAROT_ENABLED === 'true',
   emailOtp: process.env.NEXT_PUBLIC_FEATURE_EMAIL_OTP_ENABLED === 'true',
+  googleAuth: process.env.NEXT_PUBLIC_FEATURE_GOOGLE_AUTH_ENABLED === 'true',
 } as const;

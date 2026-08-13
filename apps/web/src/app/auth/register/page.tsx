@@ -13,6 +13,7 @@ import { Features } from '@/config/features';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
+import { GoogleAuthButton } from '@/components/auth/google-auth-button';
 
 const schema = z
   .object({
@@ -114,6 +115,8 @@ export default function RegisterPage() {
             {Features.emailOtp ? t('submit') : t('submitNoOtp')}
           </Button>
         </form>
+
+        <GoogleAuthButton namespace="auth.register" />
 
         <p className="text-center text-sm text-[var(--muted-foreground)]">
           {t('hasAccount')}{' '}

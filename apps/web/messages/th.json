@@ -38,6 +38,8 @@
       "password": "รหัสผ่าน",
       "forgotPassword": "ลืมรหัสผ่าน?",
       "submit": "เข้าสู่ระบบ",
+      "orContinueWith": "หรือดำเนินการต่อด้วย",
+      "continueWithGoogle": "ดำเนินการต่อด้วย Google",
       "noAccount": "ยังไม่มีบัญชี?",
       "register": "สมัครสมาชิก"
     },
@@ -50,6 +52,8 @@
       "confirmPassword": "ยืนยันรหัสผ่าน",
       "submit": "ส่ง OTP",
       "submitNoOtp": "สร้างบัญชี",
+      "orContinueWith": "หรือดำเนินการต่อด้วย",
+      "continueWithGoogle": "ดำเนินการต่อด้วย Google",
       "hasAccount": "มีบัญชีอยู่แล้ว?",
       "signIn": "เข้าสู่ระบบ"
     },
@@ -63,6 +67,10 @@
       "resend": "ส่งใหม่",
       "resending": "กำลังส่ง...",
       "resendIn": "ส่งใหม่ใน {seconds} วินาที"
+    },
+    "googleCallback": {
+      "signingIn": "กำลังเข้าสู่ระบบ...",
+      "error": "เข้าสู่ระบบด้วย Google ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"
     },
     "forgotPassword": {
       "title": "ลืมรหัสผ่าน?",

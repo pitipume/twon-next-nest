@@ -142,14 +142,49 @@ export class AuthManager {
   async login(email: string, password: string): Promise<ManagerResult<AuthData>> {
     const user = await this.service.findUserByEmail(email);
 
-    // Constant-time failure — don't reveal whether email exists
-    if (!user || !user.isActive) {
+    // Constant-time failure — don't reveal whether email exists, or whether
+    // the account has no password set (Google-only accounts have none)
+    if (!user || !user.isActive || !user.passwordHash) {
       return { success: false };
     }
 
     const passwordValid = await this.service.verifyPassword(password, user.passwordHash);
     if (!passwordValid) {
       return { success: false };
+    }
+
+    const tokens = await this.service.generateTokenPair(user);
+    return {
+      success: true,
+      data: this.buildAuthData(user, tokens),
+    };
+  }
+
+  // ─── Google OAuth ─────────────────────────────────────────────────────────
+
+  async loginOrRegisterWithGoogle(profile: {
+    googleId: string;
+    email: string;
+    displayName: string;
+  }): Promise<ManagerResult<AuthData>> {
+    let user = await this.service.findUserByGoogleId(profile.googleId);
+
+    if (!user) {
+      const existingByEmail = await this.service.findUserByEmail(profile.email);
+      if (existingByEmail) {
+        // Google verifies email ownership, so it's safe to link automatically
+        user = await this.service.linkGoogleAccount(existingByEmail.id, profile.googleId);
+      } else {
+        user = await this.service.createGoogleUser(
+          profile.email,
+          profile.displayName,
+          profile.googleId,
+        );
+      }
+    }
+
+    if (!user.isActive) {
+      return { success: false, message: 'Account is disabled.' };
     }
 
     const tokens = await this.service.generateTokenPair(user);
@@ -204,6 +239,12 @@ export class AuthManager {
     const user = await this.service.findUserById(userId);
     if (!user || !user.isActive) {
       return { success: false, message: 'Account not found.' };
+    }
+    if (!user.passwordHash) {
+      return {
+        success: false,
+        message: 'This account signed up with Google and has no password set yet.',
+      };
     }
 
     const valid = await this.service.verifyPassword(currentPassword, user.passwordHash);

@@ -1,10 +1,11 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
@@ -12,6 +13,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
+import { GoogleAuthButton } from '@/components/auth/google-auth-button';
 
 const schema = z.object({
   email: z.string().email('Invalid email'),
@@ -21,9 +23,19 @@ type FormData = z.infer<typeof schema>;
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const setAccessToken = useAuthStore((s) => s.setAccessToken);
   const setUser = useAuthStore((s) => s.setUser);
   const t = useTranslations('auth.login');
+  const tGoogle = useTranslations('auth.googleCallback');
+
+  useEffect(() => {
+    if (searchParams.get('error') === 'google_auth_failed') {
+      toast.error(tGoogle('error'));
+    }
+    // Only check on initial load of this page
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const {
     register,
@@ -84,6 +96,8 @@ export default function LoginPage() {
             {t('submit')}
           </Button>
         </form>
+
+        <GoogleAuthButton namespace="auth.login" />
 
         <p className="text-center text-sm text-[var(--muted-foreground)]">
           {t('noAccount')}{' '}

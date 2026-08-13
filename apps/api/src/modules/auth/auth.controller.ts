@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
+import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
 import { InitiateRegisterDto } from './dto/initiate-register.dto';
 import { VerifyRegisterDto } from './dto/verify-register.dto';
@@ -10,6 +11,9 @@ import { LoginCommand } from './commands/login/login.command';
 import { RefreshTokenCommand } from './commands/refresh-token/refresh-token.command';
 import { LogoutCommand } from './commands/logout/logout.command';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
+import { GoogleProfile } from './guards/google.strategy';
+import { GoogleAuthCommand } from './commands/google-auth/google-auth.command';
 import { ForgotPasswordCommand } from './commands/forgot-password/forgot-password.command';
 import { ResetPasswordCommand } from './commands/reset-password/reset-password.command';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
@@ -31,7 +35,10 @@ const COOKIE_OPTIONS = {
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly commandBus: CommandBus) {}
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly config: ConfigService,
+  ) {}
 
   @Post('register/initiate')
   initiateRegister(@Body() dto: InitiateRegisterDto) {
@@ -104,6 +111,32 @@ export class AuthController {
 
     res.clearCookie(REFRESH_TOKEN_COOKIE, COOKIE_OPTIONS);
     return result;
+  }
+
+  @UseGuards(GoogleAuthGuard)
+  @Get('google')
+  googleLogin() {
+    // GoogleAuthGuard redirects to Google's consent screen — never reaches here
+  }
+
+  @UseGuards(GoogleAuthGuard)
+  @Get('google/callback')
+  async googleCallback(@Req() req: Request, @Res() res: Response) {
+    const profile = req.user as unknown as GoogleProfile;
+    const frontendUrl = this.config.get('FRONTEND_URL', 'http://localhost:3000');
+
+    const result = await this.commandBus.execute(
+      new GoogleAuthCommand(profile.googleId, profile.email, profile.displayName),
+    );
+
+    if (result.code !== 'A001' || !result.data?.refreshToken) {
+      return res.redirect(`${frontendUrl}/auth/login?error=google_auth_failed`);
+    }
+
+    this.setRefreshCookie(res, result.data.refreshToken);
+    return res.redirect(
+      `${frontendUrl}/auth/google/callback?accessToken=${encodeURIComponent(result.data.accessToken)}`,
+    );
   }
 
   @UseGuards(JwtAuthGuard)

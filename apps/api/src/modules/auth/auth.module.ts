@@ -8,6 +8,8 @@ import { AuthRepository } from './repositories/auth.repository';
 import { JwtStrategy } from './guards/jwt.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { GoogleStrategy } from './guards/google.strategy';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { NotificationModule } from '../notification/notification.module';
 import { RedisModule } from '../../infrastructure/redis/redis.module';
 import { InitiateRegisterHandler } from './commands/initiate-register/initiate-register.handler';
@@ -19,6 +21,7 @@ import { ForgotPasswordHandler } from './commands/forgot-password/forgot-passwor
 import { ResetPasswordHandler } from './commands/reset-password/reset-password.handler';
 import { UpdateProfileHandler } from './commands/update-profile/update-profile.handler';
 import { ChangePasswordHandler } from './commands/change-password/change-password.handler';
+import { GoogleAuthHandler } from './commands/google-auth/google-auth.handler';
 
 const CommandHandlers = [
   InitiateRegisterHandler,
@@ -30,6 +33,7 @@ const CommandHandlers = [
   ResetPasswordHandler,
   UpdateProfileHandler,
   ChangePasswordHandler,
+  GoogleAuthHandler,
 ];
 
 @Module({
@@ -46,6 +50,8 @@ const CommandHandlers = [
     JwtStrategy,
     JwtAuthGuard,
     RolesGuard,
+    GoogleStrategy,
+    GoogleAuthGuard,
     // Layers: Manager → Service → Repository
     AuthManager,
     AuthService,

@@ -36,6 +36,10 @@ export class AuthService {
     return this.repository.findUserById(id);
   }
 
+  async findUserByGoogleId(googleId: string) {
+    return this.repository.findUserByGoogleId(googleId);
+  }
+
   async deleteUser(userId: string): Promise<void> {
     await this.repository.deleteUser(userId);
   }
@@ -47,6 +51,14 @@ export class AuthService {
 
   async verifyPassword(plainPassword: string, hash: string): Promise<boolean> {
     return bcrypt.compare(plainPassword, hash);
+  }
+
+  async createGoogleUser(email: string, displayName: string, googleId: string) {
+    return this.repository.createGoogleUser({ email, displayName, googleId });
+  }
+
+  async linkGoogleAccount(userId: string, googleId: string) {
+    return this.repository.linkGoogleAccount(userId, googleId);
   }
 
   async updateUserPassword(userId: string, newPassword: string): Promise<void> {

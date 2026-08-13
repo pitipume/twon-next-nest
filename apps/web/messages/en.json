@@ -38,6 +38,8 @@
       "password": "Password",
       "forgotPassword": "Forgot password?",
       "submit": "Sign in",
+      "orContinueWith": "Or continue with",
+      "continueWithGoogle": "Continue with Google",
       "noAccount": "Don't have an account?",
       "register": "Register"
     },
@@ -50,6 +52,8 @@
       "confirmPassword": "Confirm password",
       "submit": "Send OTP",
       "submitNoOtp": "Create account",
+      "orContinueWith": "Or continue with",
+      "continueWithGoogle": "Continue with Google",
       "hasAccount": "Already have an account?",
       "signIn": "Sign in"
     },
@@ -63,6 +67,10 @@
       "resend": "Resend",
       "resending": "Sending...",
       "resendIn": "Resend in {seconds}s"
+    },
+    "googleCallback": {
+      "signingIn": "Signing you in...",
+      "error": "Google sign-in failed. Please try again."
     },
     "forgotPassword": {
       "title": "Forgot password?",

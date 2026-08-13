@@ -14,6 +14,10 @@ export class AuthRepository {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
+  async findUserByGoogleId(googleId: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { googleId } });
+  }
+
   async deleteUser(userId: string): Promise<void> {
     await this.prisma.user.delete({ where: { id: userId } });
   }
@@ -35,6 +39,25 @@ export class AuthRepository {
 
   async updateUserPassword(userId: string, passwordHash: string): Promise<void> {
     await this.prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+  }
+
+  async createGoogleUser(data: {
+    email: string;
+    displayName: string;
+    googleId: string;
+  }): Promise<User> {
+    return this.prisma.user.create({
+      data: {
+        email: data.email,
+        displayName: data.displayName,
+        googleId: data.googleId,
+        isEmailVerified: true, // Google already verified this email
+      },
+    });
+  }
+
+  async linkGoogleAccount(userId: string, googleId: string): Promise<User> {
+    return this.prisma.user.update({ where: { id: userId }, data: { googleId } });
   }
 
   async updateDisplayName(userId: string, displayName: string): Promise<void> {

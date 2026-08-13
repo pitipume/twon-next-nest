@@ -195,12 +195,15 @@ Controlled via environment variables. Default = `false` (off). Set to `'true'` (
 |---|---|---|---|
 | eTarot | `FEATURE_ETAROT_ENABLED` | `NEXT_PUBLIC_FEATURE_ETAROT_ENABLED` | Catalog forced to EBOOK only; tarot filter tab + admin upload tab hidden |
 | Email OTP | `FEATURE_EMAIL_OTP_ENABLED` | `NEXT_PUBLIC_FEATURE_EMAIL_OTP_ENABLED` | No email sent on register; fixed OTP `000000` stored; frontend auto-verifies (no verify page shown) |
+| Google Auth | `FEATURE_GOOGLE_AUTH_ENABLED` | `NEXT_PUBLIC_FEATURE_GOOGLE_AUTH_ENABLED` | "Continue with Google" hidden on login/register; `GET /api/auth/google` and `/api/auth/google/callback` return 404 |
 
 Flag logic lives in:
 - `apps/api/src/config/features.ts`
 - `apps/web/src/config/features.ts`
 
 When `FEATURE_EMAIL_OTP_ENABLED=true`: OTP is generated, logged to server console (`AuthManager` Logger), and emailed via Resend.
+
+**Local dev gotcha:** `apps/api/src/main.ts` must `import 'dotenv/config'` as its first line, before any other import. `Features.*` reads `process.env` at module-import time, which happens before Nest's `ConfigModule.forRoot()` ever runs — so without the explicit early `dotenv` load, flag values from a local `.env` file are silently ignored (always read as `false`) no matter what's written there. This only affects local dev; Render/Docker inject real env vars into the process before Node starts, so production is unaffected.
 
 ---
 
@@ -213,6 +216,8 @@ When `FEATURE_EMAIL_OTP_ENABLED=true`: OTP is generated, logged to server consol
 - Logout (revokes refresh token)
 - Forgot password / reset password (OTP flow)
 - Profile editing — display name change + password change (current password required)
+- **Google OAuth login/register** (behind `googleAuth` flag) — `User.passwordHash` is nullable, `User.googleId` added (unique). Auto-links to an existing password account by email (Google-verified email is trusted); otherwise creates a Google-only account (`isEmailVerified: true`, no password). Server-redirect flow: `GET /auth/google` → Google consent → `GET /auth/google/callback` sets the refresh cookie and redirects to `{FRONTEND_URL}/auth/google/callback?accessToken=...`, which the frontend page picks up.
+  - **Deferred:** no "set a password" flow yet for Google-only accounts — they can only sign in via Google until that's built.
 
 ### Catalog
 - Browse published products (ebook + tarot, filterable)

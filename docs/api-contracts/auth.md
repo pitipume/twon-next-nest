@@ -125,6 +125,27 @@ Rotates and sets new `refresh_token` HttpOnly cookie.
 
 ---
 
+## GET /api/auth/google
+
+Redirects the browser to Google's OAuth consent screen. Gated by `FEATURE_GOOGLE_AUTH_ENABLED` — returns `404` when the flag is off.
+
+---
+
+## GET /api/auth/google/callback
+
+Google redirects here after consent. Not called directly by the frontend.
+
+Finds or creates the user (matches by `googleId`, then falls back to linking by `email` — Google-verified emails are trusted for auto-linking to an existing password account), issues tokens, sets the `refresh_token` HttpOnly cookie, then redirects the browser to:
+
+- Success: `{FRONTEND_URL}/auth/google/callback?accessToken=eyJ...`
+- Failure: `{FRONTEND_URL}/auth/login?error=google_auth_failed`
+
+The frontend's `/auth/google/callback` page reads `accessToken` from the query string, stores it, and calls `GET /api/auth/me` to load the user.
+
+Gated by `FEATURE_GOOGLE_AUTH_ENABLED` — returns `404` when the flag is off.
+
+---
+
 ## POST /api/auth/logout
 
 Requires: `Authorization: Bearer {accessToken}`
