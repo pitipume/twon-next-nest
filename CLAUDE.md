@@ -50,7 +50,7 @@ Repository   → Prisma / Mongoose — no logic
 ### Databases
 | Purpose | Database | Hosted |
 |---|---|---|
-| Users, Auth, Orders, Payments | PostgreSQL | Render (local → production) |
+| Users, Auth, Orders, Payments | PostgreSQL | Neon (local Docker → production) |
 | Ebook metadata, Tarot deck config | MongoDB | Atlas M0 (free forever) |
 | Sessions, OTP, Cache, Rate-limit | Redis | Upstash (free tier) |
 
@@ -70,7 +70,7 @@ Repository   → Prisma / Mongoose — no logic
 |---|---|---|---|
 | Now | Frontend hosting | Vercel | Free |
 | Now | Backend hosting | Render | Free / $7/month |
-| Now | PostgreSQL | Render | Free |
+| Now | PostgreSQL | Neon | Free |
 | Now | MongoDB | Atlas M0 | Free |
 | Now | Redis | Upstash | Free |
 | Now | File storage | Cloudflare R2 | Free 10GB |
