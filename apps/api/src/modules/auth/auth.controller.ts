@@ -22,6 +22,8 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateProfileCommand } from './commands/update-profile/update-profile.command';
 import { ChangePasswordCommand } from './commands/change-password/change-password.command';
+import { AuthService } from './services/auth.service';
+import { ApiResponse } from '../../common/response/api-response';
 
 const REFRESH_TOKEN_COOKIE = 'refresh_token';
 const isProd = process.env.NODE_ENV === 'production';
@@ -38,6 +40,7 @@ export class AuthController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly config: ConfigService,
+    private readonly authService: AuthService,
   ) {}
 
   @Post('register/initiate')
@@ -139,10 +142,23 @@ export class AuthController {
     );
   }
 
+  // The JWT payload only carries id/email/role (kept small on purpose) — this
+  // endpoint is the one place a full profile is expected, so it looks the
+  // user up rather than just echoing token claims back (which used to leave
+  // displayName undefined for any caller relying on /auth/me, e.g. the
+  // Google OAuth callback page).
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  getMe(@Req() req: Request) {
-    return { code: 'A001', data: (req as any).user };
+  async getMe(@Req() req: Request) {
+    const userId = (req as any).user.id;
+    const user = await this.authService.findUserById(userId);
+    if (!user) return ApiResponse.notFound('User not found.');
+    return ApiResponse.success({
+      id: user.id,
+      email: user.email,
+      displayName: user.displayName,
+      role: user.role,
+    });
   }
 
   @Post('forgot-password')
