@@ -8,7 +8,13 @@ export class GetProductsHandler implements IQueryHandler<GetProductsQuery> {
   constructor(private readonly manager: CatalogManager) {}
 
   async execute(query: GetProductsQuery) {
-    const result = await this.manager.listProducts(query.type, query.page, query.limit, query.search);
+    const result = await this.manager.listProducts(
+      query.type,
+      query.page,
+      query.limit,
+      query.search,
+      query.isAdmin,
+    );
     return ApiResponse.success(result);
   }
 }

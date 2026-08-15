@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -26,6 +27,7 @@ import { UploadTarotDeckDto } from './dto/upload-tarot-deck.dto';
 import { SetPaymentConfigDto } from './dto/set-payment-config.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { ApiResponse } from '../../common/response/api-response';
+import { Features } from '../../config/features';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.MERCHANT, UserRole.ADMIN)
@@ -63,18 +65,22 @@ export class AdminController {
     return { code: 'A001', status: 'success', data: result };
   }
 
-  // POST /api/admin/tarot-decks/upload-urls — get presigned PUT URLs
+  // POST /api/admin/tarot-decks/upload-urls — get presigned PUT URLs  [ADMIN only, eTarot flag]
   @Post('tarot-decks/upload-urls')
+  @Roles(UserRole.ADMIN)
   getTarotUploadUrls() {
+    if (!Features.etarot) throw new NotFoundException();
     return this.service.getTarotUploadUrls(randomUUID());
   }
 
-  // POST /api/admin/tarot-decks — confirm upload; ZIP is downloaded from R2 and processed
+  // POST /api/admin/tarot-decks — confirm upload; ZIP is downloaded from R2 and processed  [ADMIN only, eTarot flag]
   @Post('tarot-decks')
+  @Roles(UserRole.ADMIN)
   async uploadTarotDeck(
     @Body() dto: UploadTarotDeckDto,
     @CurrentUser() user: { id: string },
   ) {
+    if (!Features.etarot) throw new NotFoundException();
     const result = await this.service.uploadTarotDeck({
       name: dto.name,
       description: dto.description,

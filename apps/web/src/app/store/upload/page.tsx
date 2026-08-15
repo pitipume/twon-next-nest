@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { toast } from 'sonner';
 import { Upload, FileText, Image, Archive } from 'lucide-react';
 import { Features } from '@/config/features';
+import { useAuthStore } from '@/store/auth.store';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -208,6 +209,9 @@ function ProgressBar({ step, progress }: { step: UploadStep; progress: number })
 
 export default function StoreUploadPage() {
   const router = useRouter();
+  const user = useAuthStore((s) => s.user);
+  // eTarot is ADMIN-only while in testing — MERCHANT loses access too, see CLAUDE.md
+  const canSeeTarot = Features.etarot && user?.role === 'ADMIN';
   const [uploadType, setUploadType] = useState<UploadType>('ebook');
 
   // Ebook file state
@@ -355,7 +359,7 @@ export default function StoreUploadPage() {
       </div>
 
       <div className="flex rounded-lg border border-[var(--border)] overflow-hidden">
-        {(['ebook', ...(Features.etarot ? ['tarot'] : [])] as UploadType[]).map((t) => (
+        {(['ebook', ...(canSeeTarot ? ['tarot'] : [])] as UploadType[]).map((t) => (
           <button
             key={t}
             type="button"

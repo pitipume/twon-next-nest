@@ -102,10 +102,13 @@ export default function HomePage() {
   // O(1) ownership lookup for the catalog grid
   const ownedProductIds = new Set(libraryItems?.map((item) => item.productId) ?? []);
 
+  // eTarot is ADMIN-only while in testing — see CLAUDE.md
+  const canSeeTarot = Features.etarot && user?.role === 'ADMIN';
+
   const filters: { key: Filter; label: string }[] = [
     { key: 'all', label: t('filterAll') },
     { key: 'ebook', label: t('filterEbook') },
-    ...(Features.etarot ? [{ key: 'tarot_deck' as Filter, label: t('filterTarot') }] : []),
+    ...(canSeeTarot ? [{ key: 'tarot_deck' as Filter, label: t('filterTarot') }] : []),
   ];
 
   return (
@@ -119,7 +122,7 @@ export default function HomePage() {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder={Features.etarot ? t('searchPlaceholder') : t('searchPlaceholderEbook')}
+          placeholder={canSeeTarot ? t('searchPlaceholder') : t('searchPlaceholderEbook')}
           className="w-full h-11 pl-10 pr-4 rounded-xl border border-[var(--border)] bg-[var(--background)] text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
         />
       </div>
