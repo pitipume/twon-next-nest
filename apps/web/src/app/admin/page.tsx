@@ -21,6 +21,7 @@ export default function AdminPage() {
     { href: '/admin/orders', label: 'Pending payments', emoji: '🧾', desc: 'Approve or reject payment slips' },
     { href: '/admin/config', label: 'Payment config', emoji: '🏦', desc: 'Set bank details & QR code' },
     { href: '/admin/users', label: 'Users', emoji: '👥', desc: 'Search users and manage roles' },
+    { href: '/admin/maintenance', label: 'Maintenance', emoji: '🚧', desc: 'Close the site to everyone except ADMIN' },
   ];
 
   return (

@@ -30,11 +30,17 @@ const makeCatalog = () => ({
   findCoverImageUrls: jest.fn(),
 });
 
+const makeMaintenance = () => ({
+  getConfig: jest.fn(),
+  setConfig: jest.fn(),
+});
+
 function buildService(prismaOverrides = {}) {
   const prisma = makePrisma(prismaOverrides) as any;
   const storage = makeStorage() as any;
   const catalog = makeCatalog() as any;
-  return { service: new AdminService(prisma, storage, catalog), prisma, catalog };
+  const maintenance = makeMaintenance() as any;
+  return { service: new AdminService(prisma, storage, catalog, maintenance), prisma, catalog };
 }
 
 // ─── getAllProducts ───────────────────────────────────────────────────────────

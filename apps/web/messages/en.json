@@ -1,4 +1,9 @@
 {
+  "maintenance": {
+    "title": "We're temporarily closed",
+    "message": "We're temporarily closed for maintenance. We'll be back online soon.",
+    "backBy": "Expected back online around {time}"
+  },
   "nav": {
     "catalog": "Catalog",
     "library": "My Library",

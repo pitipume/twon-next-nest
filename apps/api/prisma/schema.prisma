@@ -171,6 +171,17 @@ model PaymentConfig {
   @@map("payment_config")
 }
 
+// ─── Maintenance mode (admin-toggled site-wide lock, ADMIN role bypasses) ──────
+
+model MaintenanceConfig {
+  id        String    @id @default("singleton") // only one record ever
+  enabled   Boolean   @default(false)
+  backByAt  DateTime? // optional ETA shown to users; null = no ETA given
+  updatedAt DateTime  @updatedAt
+
+  @@map("maintenance_config")
+}
+
 // ─── Library ─────────────────────────────────────────────────────────────────
 
 model LibraryItem {

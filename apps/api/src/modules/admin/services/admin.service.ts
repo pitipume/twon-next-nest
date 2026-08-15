@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, Logger, NotFoundException } from '@nes
 import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
 import { StorageService } from '../../../infrastructure/storage/storage.service';
 import { CatalogRepository } from '../../catalog/repositories/catalog.repository';
+import { MaintenanceService } from '../../system/services/maintenance.service';
 import { OrderStatus, ProductType, UserRole } from '@prisma/client';
 import AdmZip from 'adm-zip';
 import sharp from 'sharp';
@@ -14,6 +15,7 @@ export class AdminService {
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
     private readonly catalog: CatalogRepository,
+    private readonly maintenance: MaintenanceService,
   ) {}
 
   // ─── Presigned upload URL generation ────────────────────────────────────
@@ -238,6 +240,16 @@ export class AdminService {
       create: { id: 'singleton', ...data },
       update: data,
     });
+  }
+
+  // ─── Maintenance mode ───────────────────────────────────────────────────────
+
+  async getMaintenanceConfig() {
+    return this.maintenance.getConfig();
+  }
+
+  async setMaintenanceConfig(params: { enabled: boolean; backByAt?: Date | null }) {
+    return this.maintenance.setConfig(params);
   }
 
   async findUserByEmail(email: string) {

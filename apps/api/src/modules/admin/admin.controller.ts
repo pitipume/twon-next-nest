@@ -25,6 +25,7 @@ import { AdminService } from './services/admin.service';
 import { UploadEbookDto } from './dto/upload-ebook.dto';
 import { UploadTarotDeckDto } from './dto/upload-tarot-deck.dto';
 import { SetPaymentConfigDto } from './dto/set-payment-config.dto';
+import { SetMaintenanceConfigDto } from './dto/set-maintenance-config.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { ApiResponse } from '../../common/response/api-response';
 import { Features } from '../../config/features';
@@ -159,6 +160,27 @@ export class AdminController {
       accountName: dto.accountName,
       accountNumber: dto.accountNumber,
       commissionRate: dto.commissionRate,
+    });
+    return ApiResponse.success(result);
+  }
+
+  // GET /api/admin/maintenance-config — load current state  [ADMIN only]
+  // Exempt from MaintenanceGuard (see modules/system) so ADMIN can always
+  // reach this even while maintenance is active.
+  @Get('maintenance-config')
+  @Roles(UserRole.ADMIN)
+  async getMaintenanceConfig() {
+    const config = await this.service.getMaintenanceConfig();
+    return ApiResponse.success(config);
+  }
+
+  // PUT /api/admin/maintenance-config — toggle site-wide maintenance mode  [ADMIN only]
+  @Put('maintenance-config')
+  @Roles(UserRole.ADMIN)
+  async setMaintenanceConfig(@Body() dto: SetMaintenanceConfigDto) {
+    const result = await this.service.setMaintenanceConfig({
+      enabled: dto.enabled,
+      backByAt: dto.backByAt ? new Date(dto.backByAt) : null,
     });
     return ApiResponse.success(result);
   }

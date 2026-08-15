@@ -6,6 +6,7 @@ import { Toaster } from 'sonner';
 import axios from 'axios';
 import { useAuthStore } from '@/store/auth.store';
 import { PostHogProvider } from './posthog-provider';
+import { MaintenanceGate } from './maintenance-gate';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -45,7 +46,7 @@ export default function AppProviders({ children }: { children: React.ReactNode }
     <QueryClientProvider client={queryClient}>
       <PostHogProvider>
         <AuthBootstrap />
-        {children}
+        <MaintenanceGate>{children}</MaintenanceGate>
         <Toaster position="top-right" richColors closeButton />
       </PostHogProvider>
     </QueryClientProvider>

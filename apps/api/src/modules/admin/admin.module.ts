@@ -4,6 +4,7 @@ import { memoryStorage } from 'multer';
 import { AdminController } from './admin.controller';
 import { AdminService } from './services/admin.service';
 import { CatalogModule } from '../catalog/catalog.module';
+import { SystemModule } from '../system/system.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { CatalogModule } from '../catalog/catalog.module';
       limits: { fileSize: 50 * 1024 * 1024 },
     }),
     CatalogModule,
+    SystemModule,
   ],
   controllers: [AdminController],
   providers: [AdminService],

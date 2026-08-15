@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -14,6 +15,8 @@ import { LibraryModule } from './modules/library/library.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { StoreModule } from './modules/store/store.module';
 import { PaymentModule } from './modules/payment/payment.module';
+import { SystemModule } from './modules/system/system.module';
+import { MaintenanceGuard } from './modules/system/guards/maintenance.guard';
 
 @Module({
   imports: [
@@ -38,8 +41,12 @@ import { PaymentModule } from './modules/payment/payment.module';
     AdminModule,
     StoreModule,
     PaymentModule,
+    SystemModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: MaintenanceGuard },
+  ],
 })
 export class AppModule {}
