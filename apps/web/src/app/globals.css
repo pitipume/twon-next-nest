@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Make Tailwind's dark: variant follow next-themes' .dark class (manual
+   toggle) instead of the OS-level prefers-color-scheme default — without
+   this, dark: utilities silently ignore the in-app theme switcher. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #09090b;

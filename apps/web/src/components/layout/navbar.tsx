@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
@@ -50,11 +51,25 @@ export function Navbar() {
         {/* Logo */}
         <Link
           href="/"
-          className="flex items-center gap-2 font-semibold tracking-tight"
+          className="flex items-center"
           onClick={() => setMobileOpen(false)}
         >
-          <span className="text-xl">✦</span>
-          <span>Twon</span>
+          <Image
+            src="/logo-light.png"
+            alt="Twon"
+            width={447}
+            height={470}
+            className="h-14 w-auto dark:hidden"
+            priority
+          />
+          <Image
+            src="/logo-dark.png"
+            alt="Twon"
+            width={450}
+            height={464}
+            className="hidden h-14 w-auto dark:block"
+            priority
+          />
         </Link>
 
         {/* Desktop nav links */}
