@@ -13,6 +13,10 @@ export class PaymentService {
     return this.repository.findOrderWithItems(orderId);
   }
 
+  async getApprovalNotificationRecipients(productIds: string[]) {
+    return this.repository.findApprovalNotificationRecipients(productIds);
+  }
+
   async uploadSlip(orderId: string, slipBuffer: Buffer, contentType: string): Promise<string> {
     const key = `slips/${orderId}/slip.${contentType.includes('png') ? 'png' : 'jpg'}`;
     await this.storage.upload(key, slipBuffer, contentType);

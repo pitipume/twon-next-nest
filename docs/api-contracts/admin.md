@@ -189,6 +189,47 @@ Earnings aggregated from completed orders. ADMIN sees all merchants; MERCHANT se
 
 ---
 
+## GET /api/admin/sales-history
+
+Itemized "who bought what, when" — sibling to `/merchant-earnings`, which aggregates by merchant and discards per-sale identity. ADMIN sees all; MERCHANT sees only sales of their own products.
+
+**Auth:** MERCHANT or ADMIN
+
+**Success (200):**
+```json
+{
+  "data": [
+    {
+      "orderId": "uuid",
+      "orderItemId": "uuid",
+      "purchasedAt": "2025-04-01T00:00:00.000Z",
+      "buyerName": "Poom",
+      "buyerEmail": "poom@example.com",
+      "productId": "uuid",
+      "productTitle": "The Art of Tarot",
+      "productType": "EBOOK",
+      "priceTHB": 299,
+      "commissionAmount": 44.85,
+      "netAmount": 254.15
+    }
+  ]
+}
+```
+
+---
+
+## GET /api/admin/orders/:orderId
+
+Full order detail for the sales-history drill-down (buyer, all items, payment/slip info). ADMIN unrestricted; MERCHANT only if they own at least one product in the order.
+
+**Auth:** MERCHANT or ADMIN
+
+**Success (200):** Order with `buyer`, `items[]` (with commission/net snapshot), and `payment` (status, slip signed URL valid 1hr, rejection reason if any).
+
+Returns `A404` (not a 404 HTTP status — see the response envelope convention) if the order doesn't exist, or if a MERCHANT doesn't own any product in it.
+
+---
+
 ## GET /api/admin/payment-config `[ADMIN only]`
 
 Get current payment config (bank details + QR). `qrImageKey` is replaced with a signed `qrImageUrl` (1hr).

@@ -193,6 +193,23 @@ export class AdminController {
     return ApiResponse.success(data);
   }
 
+  // GET /api/admin/sales-history — itemized "who bought what"; ADMIN sees all, MERCHANT sees own only
+  @Get('sales-history')
+  async getSalesHistory(@CurrentUser() user: { id: string; role: string }) {
+    const merchantId = user.role === UserRole.ADMIN ? undefined : user.id;
+    const data = await this.service.getSalesHistory(merchantId);
+    return ApiResponse.success(data);
+  }
+
+  // GET /api/admin/orders/:orderId — full order detail for the sales-history drill-down
+  @Get('orders/:orderId')
+  async getOrderDetail(@Param('orderId') orderId: string, @CurrentUser() user: { id: string; role: string }) {
+    const merchantId = user.role === UserRole.ADMIN ? undefined : user.id;
+    const data = await this.service.getOrderDetail(orderId, merchantId);
+    if (!data) return ApiResponse.notFound('Order not found.');
+    return ApiResponse.success(data);
+  }
+
   // POST /api/admin/payment-config/qr — upload PromptPay QR image  [ADMIN only]
   @Post('payment-config/qr')
   @Roles(UserRole.ADMIN)

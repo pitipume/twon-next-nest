@@ -9,6 +9,7 @@ import Image from 'next/image';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
 import { Product } from '@/types/product';
+import { Order } from '@/types/order';
 import { Badge } from '@/components/ui/badge';
 import { PageSpinner } from '@/components/ui/spinner';
 
@@ -38,6 +39,17 @@ export default function LibraryPage() {
     enabled: !!user,
   });
 
+  const { data: orders } = useQuery({
+    queryKey: ['my-orders'],
+    queryFn: async () => {
+      const res = await api.get('/store/orders');
+      return res.data.data as Order[];
+    },
+    enabled: !!user,
+  });
+
+  const pendingOrders = orders?.filter((o) => o.status === 'PENDING' || o.status === 'WAITING_APPROVAL') ?? [];
+
   if (!user || isLoading) return <PageSpinner />;
 
   return (
@@ -46,6 +58,34 @@ export default function LibraryPage() {
         <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
         <p className="text-sm text-[var(--muted-foreground)]">{t('subtitle')}</p>
       </div>
+
+      {pendingOrders.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-sm font-medium text-[var(--muted-foreground)]">{t('pendingTitle')}</h2>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {pendingOrders.map((order) => (
+              <Link
+                key={order.id}
+                href={`/checkout/${order.id}`}
+                className="flex items-center justify-between gap-3 rounded-xl border border-amber-300/50 bg-amber-50 p-4 transition-colors hover:bg-amber-100 dark:border-amber-900/50 dark:bg-amber-950/30 dark:hover:bg-amber-950/50"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">
+                    {order.orderItems.map((i) => i.product?.title).filter(Boolean).join(', ')}
+                  </p>
+                  <p className="text-xs text-[var(--muted-foreground)]">
+                    {t('pendingOrderedOn', { date: new Date(order.createdAt).toLocaleDateString() })}
+                  </p>
+                  <p className="mt-1 text-xs font-medium text-amber-700 dark:text-amber-400">
+                    {order.status === 'WAITING_APPROVAL' ? t('pendingWaitingApproval') : t('pendingUploadSlip')}
+                  </p>
+                </div>
+                <span className="text-2xl shrink-0">⏳</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {!items?.length ? (
         <div className="flex flex-col items-center justify-center py-20 text-[var(--muted-foreground)]">

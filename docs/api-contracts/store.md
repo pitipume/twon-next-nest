@@ -45,7 +45,8 @@ Notes:
 - `payment.qrImageUrl` is a signed URL valid for **30 minutes**
 
 **Errors:**
-- `A409` — one or more products already owned by this user
+- `A002` — one or more products already owned by this user
+- `A002` — one or more products already have a pending/awaiting-approval order for this user (prevents duplicate purchases)
 - `A404` — one or more products not found or not published
 
 ---
@@ -96,9 +97,9 @@ Notes:
 
 ---
 
-## GET /api/store/orders `[Planned — not yet in controller]`
+## GET /api/store/orders
 
-Get all orders for the logged-in user, newest first.
+Get all orders for the logged-in user, newest first — every status, including `PENDING`/`WAITING_APPROVAL`. The frontend library page uses this to show a "pending approval" section separate from owned content.
 
 **Success (200):**
 ```json
@@ -108,7 +109,7 @@ Get all orders for the logged-in user, newest first.
   "data": [
     {
       "id": "order-uuid",
-      "status": "COMPLETED",
+      "status": "WAITING_APPROVAL",
       "totalTHB": 299,
       "createdAt": "2025-04-01T00:00:00.000Z",
       "orderItems": [
@@ -117,8 +118,11 @@ Get all orders for the logged-in user, newest first.
           "priceTHB": 299,
           "product": { "title": "The Art of Tarot", "productType": "EBOOK" }
         }
-      ]
+      ],
+      "payment": { "id": "uuid", "status": "WAITING_APPROVAL", "amountTHB": 299 }
     }
   ]
 }
 ```
+
+Note: `POST /api/store/orders` also now rejects with `A002` if the user already has a `PENDING`/`WAITING_APPROVAL` order for any of the requested products (previously only checked already-owned products) — see error list above.

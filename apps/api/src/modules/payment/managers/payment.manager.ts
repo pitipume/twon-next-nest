@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { OrderStatus } from '@prisma/client';
 import { PaymentService } from '../services/payment.service';
+import { NotificationService } from '../../notification/services/notification.service';
 
 @Injectable()
 export class PaymentManager {
-  constructor(private readonly service: PaymentService) {}
+  constructor(
+    private readonly service: PaymentService,
+    private readonly notification: NotificationService,
+  ) {}
 
   async submitSlip(
     userId: string,
@@ -24,6 +28,17 @@ export class PaymentManager {
     const slipKey = await this.service.uploadSlip(orderId, slipBuffer, contentType);
     await this.service.submitSlip(orderId, slipKey, transferredAt, note);
 
+    const productTitles = order.orderItems.map((i) => i.product.title);
+    await this.notification.sendPaymentSlipReceivedEmail(order.user.email, order.user.displayName, productTitles);
+
+    const productIds = order.orderItems.map((i) => i.productId);
+    const recipients = await this.service.getApprovalNotificationRecipients(productIds);
+    await Promise.all(
+      recipients.map((r) =>
+        this.notification.sendPendingApprovalAdminEmail(r.email, order.user.displayName, productTitles),
+      ),
+    );
+
     return { success: true, message: 'Payment slip submitted. Awaiting approval.' } as const;
   }
 
@@ -35,6 +50,10 @@ export class PaymentManager {
     }
 
     await this.service.approvePayment(orderId, adminId);
+
+    const productTitles = order.orderItems.map((i) => i.product.title);
+    await this.notification.sendPaymentApprovedEmail(order.user.email, order.user.displayName, productTitles);
+
     return { success: true, message: 'Payment approved. Library access granted.' } as const;
   }
 
@@ -46,6 +65,8 @@ export class PaymentManager {
     }
 
     await this.service.rejectPayment(orderId, adminId, reason);
+    await this.notification.sendPaymentRejectedEmail(order.user.email, order.user.displayName, reason);
+
     return { success: true, message: 'Payment rejected.' } as const;
   }
 

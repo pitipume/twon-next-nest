@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { OrderStatus, PaymentStatus } from '@prisma/client';
+import { OrderStatus, PaymentStatus, UserRole } from '@prisma/client';
 import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
 
 @Injectable()
@@ -13,7 +13,35 @@ export class PaymentRepository {
   async findOrderWithItems(orderId: string) {
     return this.prisma.order.findUnique({
       where: { id: orderId },
-      include: { orderItems: true, payment: true },
+      include: {
+        user: { select: { id: true, email: true, displayName: true } },
+        orderItems: { include: { product: true } },
+        payment: true,
+      },
+    });
+  }
+
+  // ADMIN always approves everything, plus whichever MERCHANT(s) uploaded a
+  // product in this order — deduped, since one order can span merchants.
+  async findApprovalNotificationRecipients(
+    productIds: string[],
+  ): Promise<{ email: string; displayName: string }[]> {
+    const [admins, merchants] = await Promise.all([
+      this.prisma.user.findMany({
+        where: { role: UserRole.ADMIN },
+        select: { email: true, displayName: true },
+      }),
+      this.prisma.user.findMany({
+        where: { role: UserRole.MERCHANT, uploadedProducts: { some: { id: { in: productIds } } } },
+        select: { email: true, displayName: true },
+      }),
+    ]);
+
+    const seen = new Set<string>();
+    return [...admins, ...merchants].filter((u) => {
+      if (seen.has(u.email)) return false;
+      seen.add(u.email);
+      return true;
     });
   }
 

@@ -5,6 +5,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { CreateOrderCommand } from './commands/create-order/create-order.command';
 import { GetOrderQuery } from './queries/get-order/get-order.query';
+import { GetMyOrdersQuery } from './queries/get-my-orders/get-my-orders.query';
 
 @UseGuards(JwtAuthGuard)
 @Controller('store')
@@ -21,6 +22,12 @@ export class StoreController {
     @Body() dto: CreateOrderDto,
   ) {
     return this.commandBus.execute(new CreateOrderCommand(user.id, dto.productIds));
+  }
+
+  // GET /api/store/orders — the current user's own orders (all statuses)
+  @Get('orders')
+  getMyOrders(@CurrentUser() user: { id: string }) {
+    return this.queryBus.execute(new GetMyOrdersQuery(user.id));
   }
 
   // GET /api/store/orders/:orderId

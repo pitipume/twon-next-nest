@@ -19,6 +19,7 @@ export default function StorePage() {
   const links = [
     { href: '/store/upload', label: 'Upload content', emoji: '📤', desc: 'Add ebooks or tarot decks' },
     { href: '/store/products', label: 'My products', emoji: '📦', desc: 'Publish, unpublish or delete your products' },
+    { href: '/store/sales', label: 'Sales history', emoji: '📖', desc: 'Who bought your products, and when' },
     { href: '/store/earnings', label: 'My earnings', emoji: '💰', desc: 'Sales, commission & net payout' },
   ];
 

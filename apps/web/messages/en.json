@@ -116,6 +116,10 @@
     "emptyTitle": "Your library is empty",
     "browseCatalog": "Browse catalog →",
     "readNow": "Read now →",
-    "shuffleDeck": "Shuffle deck →"
+    "shuffleDeck": "Shuffle deck →",
+    "pendingTitle": "Pending approval",
+    "pendingWaitingApproval": "Waiting for the seller to approve your payment",
+    "pendingUploadSlip": "Upload your payment slip to continue →",
+    "pendingOrderedOn": "Ordered {date}"
   }
 }

@@ -116,6 +116,10 @@
     "emptyTitle": "คลังของคุณว่างเปล่า",
     "browseCatalog": "เรียกดูหน้าร้าน →",
     "readNow": "อ่านเลย →",
-    "shuffleDeck": "เปิดสำรับไพ่ →"
+    "shuffleDeck": "เปิดสำรับไพ่ →",
+    "pendingTitle": "รอการอนุมัติ",
+    "pendingWaitingApproval": "รอผู้ขายอนุมัติการชำระเงินของคุณ",
+    "pendingUploadSlip": "อัปโหลดสลิปการโอนเงินเพื่อดำเนินการต่อ →",
+    "pendingOrderedOn": "สั่งซื้อเมื่อ {date}"
   }
 }

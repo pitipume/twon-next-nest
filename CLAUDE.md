@@ -177,11 +177,13 @@ Admin upload flow (presigned R2 — client uploads files directly, backend proce
 ## Payment Flow (Manual PromptPay)
 
 Current implementation (no payment gateway license required):
-1. Customer places order → `POST /store/orders` → `Order` created (PENDING)
-2. Customer sees PromptPay QR + bank details → uploads payment slip image
-3. Admin receives notification → reviews slip → `PATCH /payment/:id/approve` or reject
-4. On approval → `LibraryItem` records created → customer can read/access content
-5. All payments go through Twon's bank account (not a payment gateway — platform collects for products it sells)
+1. Customer places order → `POST /store/orders` → `Order` created (PENDING). Rejected if the customer already owns the product, **or already has a PENDING/WAITING_APPROVAL order for it** (no duplicate purchases).
+2. Customer sees PromptPay QR + bank details → uploads payment slip image → email sent to customer ("received, please wait") and to every ADMIN + the relevant MERCHANT(s) ("new payment awaiting approval")
+3. Admin (or the product's MERCHANT, informationally — approval itself stays ADMIN-only) reviews slip → `POST /payment/orders/:orderId/approve` or `/reject`
+4. On approval → `LibraryItem` records created → customer can read/access content → email sent to customer ("approved, start reading")
+5. On rejection → email sent to customer with the rejection reason
+6. Customer can see their pending orders (with a "waiting for approval" message) in `/library`, via `GET /store/orders` — not just already-owned content
+7. All payments go through Twon's bank account (not a payment gateway — platform collects for products it sells)
 
 **Merchant revenue sharing (V2):** Platform takes 10–20% commission. At month-end, admin reviews merchant sales and manually transfers net amount via bank transfer. No payment gateway license needed — this is a standard marketplace/consignment model.
 
@@ -234,6 +236,7 @@ When `FEATURE_EMAIL_OTP_ENABLED=true`: OTP is generated, logged to server consol
 - View own products list — MERCHANT sees only their own; ADMIN sees all
 - `uploadedBy` (userId) saved on every Product; ownership checked on mutate endpoints
 - Earnings dashboard — `GET /admin/merchant-earnings` shows gross/commission/net; MERCHANT filtered to own; ADMIN sees all merchants
+- Sales history — `GET /admin/sales-history` (itemized: who bought what, when — unlike earnings, which only aggregates); MERCHANT filtered to own; click-through to `GET /admin/orders/:orderId` for full detail (buyer, items, slip). Frontend pages duplicated at `/admin/sales(/:orderId)` and `/store/sales(/:orderId)`, same duplication pattern as the earnings pages.
 
 ### Admin (`/admin`) — ADMIN only
 - Pending payments — approve individually or select-all + batch approve
@@ -241,6 +244,7 @@ When `FEATURE_EMAIL_OTP_ENABLED=true`: OTP is generated, logged to server consol
 - Payment config (bank name, account number, QR image, commission rate %) 
 - Commission snapshots written to `OrderItem` at approval time (`commissionRate`, `commissionAmount`, `netAmount`)
 - User management — search by email, change role (CUSTOMER / PREMIUM / MERCHANT / ADMIN)
+- Email notified (along with the relevant MERCHANT) whenever a customer submits a payment slip — see Payment Flow above
 
 ### Ebook Reader
 - Scroll mode (virtual scrolling via `@tanstack/react-virtual` — safe for 1000+ pages)
@@ -255,6 +259,7 @@ When `FEATURE_EMAIL_OTP_ENABLED=true`: OTP is generated, logged to server consol
 - Ebook reading session endpoint (returns signed PDF URL + page count)
 - Tarot session endpoint (returns signed card image URLs)
 - Library covers signed correctly (was returning raw R2 keys — fixed)
+- Pending-approval orders shown in a separate section (via `GET /store/orders`, filtered client-side to non-COMPLETED) — "waiting for approval" or "upload your slip" messaging, linking back to `/checkout/:orderId`
 
 ### Analytics
 - **Traffic analytics via PostHog** (cloud free tier) — `apps/web/src/providers/posthog-provider.tsx`, wired into `AppProviders`. Autocapture + manual `$pageview` tracking on route change (App Router client-side nav doesn't trigger a real page load, so `capture_pageview: false` + a `usePathname`/`useSearchParams` effect handles it). Calls `posthog.identify(user.id, {email, role})` once a user is logged in, `posthog.reset()` on logout.

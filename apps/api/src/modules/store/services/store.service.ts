@@ -17,6 +17,10 @@ export class StoreService {
     return this.repository.findAlreadyOwned(userId, productIds);
   }
 
+  async getPendingOrderProducts(userId: string, productIds: string[]) {
+    return this.repository.findPendingOrderProducts(userId, productIds);
+  }
+
   async createOrder(userId: string, items: { productId: string; priceTHB: number }[]) {
     const total = items.reduce((sum, i) => sum + i.priceTHB, 0);
     return this.repository.createOrder({ userId, totalTHB: total, items });

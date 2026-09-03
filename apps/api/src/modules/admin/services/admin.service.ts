@@ -319,6 +319,99 @@ export class AdminService {
     return [...byMerchant.values()];
   }
 
+  // Itemized "who bought what" — sibling to getMerchantEarnings, which
+  // aggregates by merchant and discards per-sale identity. Same
+  // COMPLETED-order / uploadedBy scoping convention.
+  async getSalesHistory(merchantId?: string) {
+    const items = await this.prisma.orderItem.findMany({
+      where: {
+        order: { status: OrderStatus.COMPLETED },
+        product: merchantId
+          ? { uploadedBy: merchantId }
+          : { uploadedBy: { not: null } },
+      },
+      include: {
+        order: {
+          select: {
+            id: true,
+            createdAt: true,
+            user: { select: { id: true, displayName: true, email: true } },
+          },
+        },
+        product: {
+          select: { id: true, title: true, productType: true },
+        },
+      },
+      orderBy: { order: { createdAt: 'desc' } },
+    });
+
+    return items.map((item) => ({
+      orderId: item.order.id,
+      orderItemId: item.id,
+      purchasedAt: item.order.createdAt,
+      buyerName: item.order.user.displayName,
+      buyerEmail: item.order.user.email,
+      productId: item.product.id,
+      productTitle: item.product.title,
+      productType: item.product.productType,
+      priceTHB: Number(item.priceTHB),
+      commissionAmount: item.commissionAmount !== null ? Number(item.commissionAmount) : null,
+      netAmount: item.netAmount !== null ? Number(item.netAmount) : Number(item.priceTHB),
+    }));
+  }
+
+  // Full order detail for the sales-history drill-down. ADMIN unrestricted;
+  // MERCHANT only if they own at least one product in the order (checked by
+  // the caller via getSalesHistory-style scoping, enforced again here).
+  async getOrderDetail(orderId: string, merchantId?: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        user: { select: { id: true, displayName: true, email: true } },
+        orderItems: { include: { product: { select: { id: true, title: true, productType: true, uploadedBy: true } } } },
+        payment: true,
+      },
+    });
+    if (!order) return null;
+
+    if (merchantId) {
+      const ownsAnItem = order.orderItems.some((i) => i.product.uploadedBy === merchantId);
+      if (!ownsAnItem) return null;
+    }
+
+    let slipUrl: string | null = null;
+    if (order.payment?.slipImageKey) {
+      slipUrl = await this.storage.getSignedReadUrl(order.payment.slipImageKey, 60 * 60);
+    }
+
+    return {
+      id: order.id,
+      status: order.status,
+      totalTHB: Number(order.totalTHB),
+      createdAt: order.createdAt,
+      buyer: order.user,
+      items: order.orderItems.map((i) => ({
+        id: i.id,
+        productId: i.productId,
+        title: i.product.title,
+        productType: i.product.productType,
+        priceTHB: Number(i.priceTHB),
+        commissionAmount: i.commissionAmount !== null ? Number(i.commissionAmount) : null,
+        netAmount: i.netAmount !== null ? Number(i.netAmount) : null,
+      })),
+      payment: order.payment
+        ? {
+            status: order.payment.status,
+            transferredAt: order.payment.transferredAt,
+            note: order.payment.note,
+            approvedAt: order.payment.approvedAt,
+            rejectionReason: order.payment.rejectionReason,
+            slipUrl,
+          }
+        : null,
+    };
+  }
+
   async uploadPaymentQr(qrBuffer: Buffer, contentType: string) {
     const key = 'payment-config/qr.webp';
     // Convert any image to WebP for consistency

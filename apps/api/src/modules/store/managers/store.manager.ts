@@ -18,6 +18,15 @@ export class StoreManager {
       return { success: false, message: 'You already own one or more of these products.' } as const;
     }
 
+    // 2b. Check customer doesn't already have a pending/awaiting-approval order for any of them
+    const pending = await this.service.getPendingOrderProducts(userId, productIds);
+    if (pending.length > 0) {
+      return {
+        success: false,
+        message: 'You already have a pending order for one or more of these products. Check your library for its status.',
+      } as const;
+    }
+
     // 3. Build order items with price locked at current price
     const items = products.map((p) => ({
       productId: p.id,
@@ -67,6 +76,14 @@ export class StoreManager {
   }
 
   async getMyOrders(userId: string) {
-    return this.service.getOrdersByUser(userId);
+    const orders = await this.service.getOrdersByUser(userId);
+    return orders.map((order) => ({
+      ...order,
+      totalTHB: Number(order.totalTHB),
+      orderItems: order.orderItems.map((i) => ({
+        ...i,
+        priceTHB: Number(i.priceTHB),
+      })),
+    }));
   }
 }

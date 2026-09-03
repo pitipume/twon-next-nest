@@ -5,9 +5,10 @@ import { StoreService } from './services/store.service';
 import { StoreRepository } from './repositories/store.repository';
 import { CreateOrderHandler } from './commands/create-order/create-order.handler';
 import { GetOrderHandler } from './queries/get-order/get-order.handler';
+import { GetMyOrdersHandler } from './queries/get-my-orders/get-my-orders.handler';
 
 const CommandHandlers = [CreateOrderHandler];
-const QueryHandlers = [GetOrderHandler];
+const QueryHandlers = [GetOrderHandler, GetMyOrdersHandler];
 
 @Module({
   controllers: [StoreController],

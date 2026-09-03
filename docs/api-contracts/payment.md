@@ -26,6 +26,8 @@ Customer uploads payment slip after bank transfer.
 
 Order status changes: `PENDING → WAITING_APPROVAL`
 
+Sends email (best-effort, never fails the request): "payment received, please wait" to the customer, and "new payment awaiting approval" to every `ADMIN` plus any `MERCHANT`(s) who uploaded a product in the order.
+
 **Errors:**
 - `A409` — order is not in PENDING status
 - `A002` — invalid file type or file too large
@@ -46,6 +48,8 @@ Requires: `ADMIN` or `SUPER_ADMIN` role
 Order status changes: `WAITING_APPROVAL → COMPLETED`
 Payment status changes: `WAITING_APPROVAL → APPROVED`
 LibraryItems created for all products in the order.
+
+Sends email (best-effort) to the customer: "your payment was approved, start reading."
 
 **Errors:**
 - `A409` — order is not in WAITING_APPROVAL status
@@ -69,6 +73,8 @@ Requires: `ADMIN` or `SUPER_ADMIN` role
 ```
 
 Order status changes: `WAITING_APPROVAL → REJECTED`
+
+Sends email (best-effort) to the customer with the rejection reason.
 
 ---
 

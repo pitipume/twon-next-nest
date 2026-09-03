@@ -19,6 +19,7 @@ export default function AdminPage() {
 
   const links = [
     { href: '/admin/orders', label: 'Pending payments', emoji: '🧾', desc: 'Approve or reject payment slips' },
+    { href: '/admin/sales', label: 'Sales history', emoji: '📖', desc: 'Every completed sale, who bought what' },
     { href: '/admin/config', label: 'Payment config', emoji: '🏦', desc: 'Set bank details & QR code' },
     { href: '/admin/users', label: 'Users', emoji: '👥', desc: 'Search users and manage roles' },
     { href: '/admin/maintenance', label: 'Maintenance', emoji: '🚧', desc: 'Close the site to everyone except ADMIN' },

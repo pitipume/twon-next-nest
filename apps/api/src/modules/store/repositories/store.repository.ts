@@ -20,6 +20,20 @@ export class StoreRepository {
     return owned.map((o) => o.productId);
   }
 
+  async findPendingOrderProducts(userId: string, productIds: string[]): Promise<string[]> {
+    const pending = await this.prisma.orderItem.findMany({
+      where: {
+        productId: { in: productIds },
+        order: {
+          userId,
+          status: { in: [OrderStatus.PENDING, OrderStatus.WAITING_APPROVAL] },
+        },
+      },
+      select: { productId: true },
+    });
+    return pending.map((o) => o.productId);
+  }
+
   async createOrder(data: {
     userId: string;
     totalTHB: number;
